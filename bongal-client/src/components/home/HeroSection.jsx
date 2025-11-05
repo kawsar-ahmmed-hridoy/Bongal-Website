@@ -15,7 +15,7 @@ const HeroSection = () => {
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
               বঙ্গাল
               <br />
-              <span className="text-green-600">ঐতিহ্যের সাথে বর্তমান</span>
+              <span className="text-green-600 text-4xl">ঐতিহ্যের সাথে বর্তমান</span>
             </h1>
             <p className="text-xl text-gray-700">
               Authentic village products delivered to your doorstep.

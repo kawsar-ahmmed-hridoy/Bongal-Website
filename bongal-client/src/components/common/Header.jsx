@@ -27,7 +27,7 @@ const Header = () => {
             </div>
             <div>
               <h1 className="text-2xl font-bold">বঙ্গাল</h1>
-              <p className="text-xs text-green-100">Village Purity, Digital Convenience</p>
+              <p className="text-xs text-green-100">ঐতিহ্যের সাথে বর্তমান</p>
             </div>
           </Link>
 
