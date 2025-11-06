@@ -15,6 +15,6 @@ app.listen(PORT, () => {
 });
 
 process.on('unhandledRejection', (err: Error) => {
-  console.error('❌ Unhandled Rejection:', err.message);
+  console.error('Unhandled Rejection:', err.message);
   process.exit(1);
 });
