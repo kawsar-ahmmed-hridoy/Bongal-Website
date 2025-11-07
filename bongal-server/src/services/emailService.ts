@@ -1,6 +1,9 @@
 import nodemailer from 'nodemailer';
 
 export class EmailService {
+  static sendVerificationEmail(email: string, verificationLink: string) {
+    throw new Error('Method not implemented.');
+  }
   private transporter;
 
   constructor() {

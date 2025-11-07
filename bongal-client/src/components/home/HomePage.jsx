@@ -70,7 +70,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* <FeaturedProducts /> */}
+      <FeaturedProducts />
 
       <section className="py-20 bg-gradient-to-r from-green-600 to-green-700 text-white">
         <div className="container mx-auto px-4 text-center">
