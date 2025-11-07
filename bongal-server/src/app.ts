@@ -1,6 +1,12 @@
 import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import authRoutes from './routes/authRoutes';
+import productRoutes from './routes/productRoutes';
+import orderRoutes from './routes/orderRoutes';
+import userRoutes from './routes/userRoutes';
+import paymentRoutes from './routes/paymentRoutes';
+import { errorHandler } from './middleware/errorHandler';
 
 dotenv.config();
 
@@ -27,6 +33,13 @@ app.get('/api', (req: Request, res: Response) => {
   });
 });
 
+app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/payment', paymentRoutes);
+
+app.use(errorHandler);
 
 app.use((req: Request, res: Response) => {
   res.status(404).json({
