@@ -12,6 +12,7 @@ import RegisterPage from './components/auth/RegisterPage';
 import AdminDashboard from './components/admin/AdminDashboard';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import NotFound from './components/common/NotFound';
+import VerifyCodePage from './components/auth/VerifyCodePage';
 
 function App() {
   return (
@@ -21,8 +22,9 @@ function App() {
           <Route path="/" element={<Layout />}>
             <Route index element={<HomePage />} />
             <Route path="cart" element={<CartPage />} />
-            <Route path="login" element={<LoginPage />} />
             <Route path="register" element={<RegisterPage />} />
+            <Route path="/verify-code" element={<VerifyCodePage />} />
+            <Route path="login" element={<LoginPage />} />
             <Route path="products/:id" element={<ProductDetail />} />
             <Route path="products" element={<ProductsPage />} />
             <Route

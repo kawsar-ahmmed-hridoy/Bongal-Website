@@ -1,15 +1,5 @@
-import { createContext, useState, useContext, useEffect } from 'react';
-
-const ThemeContext = createContext();
-
-// eslint-disable-next-line react-refresh/only-export-components
-export const useTheme = () => {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error('useTheme must be used within ThemeProvider');
-  }
-  return context;
-};
+import { useState, useEffect } from 'react';
+import { ThemeContext } from './ThemeContext';
 
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {

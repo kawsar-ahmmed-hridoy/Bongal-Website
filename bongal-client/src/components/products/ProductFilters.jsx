@@ -56,7 +56,7 @@ const ProductFilters = ({ filters, onFilterChange }) => {
       </div>
 
       <button
-        onClick={() => onFilterChange({ category: 'all', minPrice: 0, maxPrice: 2000 })}
+        onClick={() => onFilterChange({ category: 'all', minPrice: 0, maxPrice: 2000, search: '', sort: 'newest' })}
         className="w-full bg-gray-200 text-gray-800 py-2 rounded-lg hover:bg-gray-300 transition"
       >
         Clear Filters

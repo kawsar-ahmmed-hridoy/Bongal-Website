@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Eye, EyeOff } from 'lucide-react';
@@ -16,6 +16,7 @@ const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [verificationSent, setVerificationSent] = useState(false);
 
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -29,34 +30,17 @@ const RegisterPage = () => {
 
   const validate = () => {
     const newErrors = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
-    }
-
-    if (!validateEmail(formData.email)) {
-      newErrors.email = 'Please enter a valid email';
-    }
-
-    if (!validatePassword(formData.password)) {
-      newErrors.password = 'Password must be at least 6 characters';
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-    }
-
-    if (!validatePhone(formData.phone)) {
-      newErrors.phone = 'Please enter a valid BD phone number (01XXXXXXXXX)';
-    }
-
+    if (!formData.name.trim()) newErrors.name = 'Name is required';
+    if (!validateEmail(formData.email)) newErrors.email = 'Please enter a valid email';
+    if (!validatePassword(formData.password)) newErrors.password = 'Password must be at least 6 characters';
+    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
+    if (!validatePhone(formData.phone)) newErrors.phone = 'Please enter a valid BD phone number (01XXXXXXXXX)';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validate()) return;
 
     setLoading(true);
@@ -69,13 +53,37 @@ const RegisterPage = () => {
         phone: formData.phone,
         address: formData.address,
       });
-      navigate('/');
+
+      setVerificationSent(true);
     } catch (err) {
       setErrors({ submit: err.response?.data?.message || 'Registration failed' });
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (verificationSent) {
+      const timer = setTimeout(() => {
+        navigate(`/verify-code?email=${encodeURIComponent(formData.email)}`);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [verificationSent, navigate, formData.email]);
+
+  if (verificationSent) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4 py-8">
+        <div className="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full text-center">
+          <h2 className="text-2xl font-bold text-green-700 mb-4">Verify Your Email</h2>
+          <p className="text-gray-600">
+            A verification email has been sent to <strong>{formData.email}</strong>.<br />
+            You will be redirected shortly to the verification page.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center px-4 py-8">
@@ -92,6 +100,7 @@ const RegisterPage = () => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          
           <div>
             <label className="block text-sm font-semibold mb-2 text-gray-700">Full Name *</label>
             <input
@@ -107,6 +116,7 @@ const RegisterPage = () => {
             {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
           </div>
 
+          
           <div>
             <label className="block text-sm font-semibold mb-2 text-gray-700">Email Address *</label>
             <input
@@ -173,9 +183,7 @@ const RegisterPage = () => {
               }`}
               placeholder="••••••••"
             />
-            {errors.confirmPassword && (
-              <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
-            )}
+            {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
           </div>
 
           <div>

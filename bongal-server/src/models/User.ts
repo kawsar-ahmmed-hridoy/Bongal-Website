@@ -10,7 +10,8 @@ export interface IUser extends Document {
   role: 'buyer' | 'admin';
   avatar?: string | undefined;
   isVerified: boolean;
-  verificationToken?: string | undefined;
+  verificationCode?: string | undefined;
+  verificationCodeExpires?: Date | undefined;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -66,7 +67,8 @@ const userSchema = new Schema<IUser>(
       type: Boolean,
       default: false,
     },
-    verificationToken: { type: String },
+    verificationCode: { type: String },
+    verificationCodeExpires: Date,
   },
   {
     timestamps: true,

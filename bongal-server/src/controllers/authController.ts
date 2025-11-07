@@ -1,8 +1,9 @@
 import type { Request, Response } from 'express';
 import User from '../models/User';
 import { generateToken } from '../utils/jwt';
-import crypto from 'crypto';
 import { EmailService } from '../services/emailService';
+
+const emailService = new EmailService();
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -16,7 +17,8 @@ export const register = async (req: Request, res: Response) => {
       });
     }
 
-    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const codeExpiry = new Date(Date.now() + 15 * 60 * 1000);
 
     const user = await User.create({
       name,
@@ -25,15 +27,15 @@ export const register = async (req: Request, res: Response) => {
       phone,
       address,
       isVerified: false,
-      verificationToken,
+      verificationCode,
+      verificationCodeExpires: codeExpiry,
     });
 
-    const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
-    await EmailService.sendVerificationEmail(user.email, verificationLink);
+    await emailService.sendVerificationEmail(user.email, `Your verification code is: ${verificationCode}`);
 
     res.status(201).json({
       success: true,
-      message: 'User registered successfully. Please check your email to verify your account.',
+      message: 'User registered successfully. Please check your email for verification code.',
       user: {
         id: user._id,
         name: user.name,
@@ -49,25 +51,27 @@ export const register = async (req: Request, res: Response) => {
   }
 };
 
-export const verifyEmail = async (req: Request, res: Response) => {
+export const verifyCode = async (req: Request, res: Response) => {
   try {
-    const { token } = req.query;
-    if (!token || typeof token !== 'string') {
-      return res.status(400).json({ success: false, message: 'Verification token is required' });
-    }
+    const { email, code } = req.body;
+    if (!email || !code) return res.status(400).json({ success: false, message: 'Email and code are required' });
 
-    const user = await User.findOne({ verificationToken: token });
-    if (!user) {
-      return res.status(400).json({ success: false, message: 'Invalid or expired verification token' });
-    }
+    const user = await User.findOne({
+      email,
+      verificationCode: code,
+      verificationCodeExpires: { $gt: new Date() },
+    });
+
+    if (!user) return res.status(400).json({ success: false, message: 'Invalid or expired code' });
 
     user.isVerified = true;
-    user.verificationToken = undefined;
+    user.verificationCode = undefined;
+    user.verificationCodeExpires = undefined;
     await user.save();
 
     res.json({ success: true, message: 'Email verified successfully' });
   } catch (error: any) {
-    res.status(500).json({ success: false, message: error.message || 'Email verification failed' });
+    res.status(500).json({ success: false, message: error.message || 'Verification failed' });
   }
 };
 

@@ -1,7 +1,9 @@
-import User, {IUser}  from '../models/User';
-import { generateToken } from '../utils/jwt';
-import crypto from 'crypto';
+import User, { IUser } from '../models/User';
 import { EmailService } from './emailService';
+import { generateToken } from '../utils/jwt';
+
+const emailService = new EmailService();
+
 export class AuthService {
   async register(userData: {
     name: string;
@@ -15,16 +17,20 @@ export class AuthService {
       throw new Error('User already exists with this email');
     }
 
-    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const codeExpiry = new Date(Date.now() + 15 * 60 * 1000);
 
     const user = await User.create({
       ...userData,
       isVerified: false,
-      verificationToken,
+      verificationCode,
+      verificationCodeExpires: codeExpiry,
     });
 
-    const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
-    await EmailService.sendVerificationEmail(user.email, verificationLink);
+    await emailService.sendVerificationEmail(
+      user.email,
+      `Your verification code is: ${verificationCode}`
+    );
 
     return {
       user: {
@@ -33,18 +39,24 @@ export class AuthService {
         email: user.email,
         role: user.role,
       },
-      message: 'Registration successful. Please check your email to verify your account.',
+      message: 'Registration successful. A verification code has been sent to your email.',
     };
   }
 
-  async verifyEmail(token: string) {
-    const user = await User.findOne({ verificationToken: token });
+  async verifyCode(email: string, code: string) {
+    const user = await User.findOne({
+      email,
+      verificationCode: code,
+      verificationCodeExpires: { $gt: new Date() },
+    });
+
     if (!user) {
-      throw new Error('Invalid or expired verification token');
+      throw new Error('Invalid or expired verification code');
     }
 
     user.isVerified = true;
-    user.verificationToken = undefined;
+    user.verificationCode = undefined;
+    user.verificationCodeExpires = undefined;
     await user.save();
 
     return { message: 'Email verified successfully' };

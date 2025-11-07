@@ -1,4 +1,4 @@
-//import { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from "@tanstack/react-query";
 //import { productService } from '../../services/productService';
 import ProductCard from '../common/ProductCard';
@@ -7,13 +7,13 @@ import Loader from '../common/Loader';
 import { Search } from 'lucide-react';
 
 const ProductsPage = () => {
-  // const [filters, setFilters] = useState({
-  //   category: 'all',
-  //   minPrice: 0,
-  //   maxPrice: 2000,
-  //   search: '',
-  //   sort: 'newest',
-  // });
+  const [filters, setFilters] = useState({
+    category: 'all',
+    minPrice: 0,
+    maxPrice: 2000,
+    search: '',
+    sort: 'newest',
+  });
 
   const { data, isLoading, error } = useQuery(
     //['products', filters],
@@ -21,9 +21,9 @@ const ProductsPage = () => {
     { keepPreviousData: true }
   );
 
-  // const handleFilterChange = (newFilters) => {
-  //   setFilters({ ...filters, ...newFilters });
-  // };
+  const handleFilterChange = (newFilters) => {
+    setFilters({ ...filters, ...newFilters });
+  };
 
   if (isLoading) return <Loader />;
 
@@ -48,17 +48,17 @@ const ProductsPage = () => {
           <input
             type="text"
             placeholder="Search products... (পণ্য খুঁজুন...)"
-            // value={filters.search}
-            // onChange={(e) => handleFilterChange({ search: e.target.value })}
+            value={filters.search}
+            onChange={(e) => handleFilterChange({ search: e.target.value })}
             className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
           />
         </div>
       </div>
 
       <div className="flex flex-col md:flex-row gap-6">
-        {/* <div className="md:w-64 flex-shrink-0">
+        <div className="md:w-64 flex-shrink-0">
           <ProductFilters filters={filters} onFilterChange={handleFilterChange} />
-        </div> */}
+        </div>
 
         <div className="flex-1">
           <div className="flex justify-between items-center mb-6">
@@ -66,8 +66,8 @@ const ProductsPage = () => {
               Showing {products.length} {data?.total && `of ${data.total}`} products
             </p>
             <select
-              // value={filters.sort}
-              // onChange={(e) => handleFilterChange({ sort: e.target.value })}
+              value={filters.sort}
+              onChange={(e) => handleFilterChange({ sort: e.target.value })}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
             >
               <option value="newest">Newest First</option>
