@@ -36,20 +36,47 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (credentials) => {
-    const data = await authService.login(credentials);
-    setUser(data.user);
-    return data;
+    try {
+      const data = await authService.login(credentials);
+      setUser(data.user);
+      return data;
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw error;
+    }
   };
 
   const register = async (userData) => {
-    const data = await authService.register(userData);
-    setUser(data.user);
-    return data;
+    try {
+      const data = await authService.register(userData);
+      setUser(data.user);
+      return data;
+    } catch (error) {
+      console.error('Registration failed:', error);
+      throw error;
+    }
   };
 
   const logout = () => {
     authService.logout();
     setUser(null);
+  };
+
+  const updateProfile = async (profileData) => {
+    try {
+      const result = await authService.updateProfile(profileData);
+      
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to update profile');
+      }
+
+      setUser(result.user);
+      return result.user;
+
+    } catch (error) {
+      console.error('Profile update failed:', error);
+      throw new Error(error.message || 'Failed to update profile');
+    }
   };
 
   const value = {
@@ -58,6 +85,7 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    updateProfile,
     isAuthenticated: !!user,
     isAdmin: user?.role === 'admin',
   };
