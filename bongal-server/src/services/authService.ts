@@ -37,7 +37,13 @@ export class AuthService {
         id: user._id,
         name: user.name,
         email: user.email,
+        phone: user.phone,
+        address: user.address,
         role: user.role,
+        avatar: user.avatar,
+        isVerified: user.isVerified,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
       },
       message: 'Registration successful. A verification code has been sent to your email.',
     };
@@ -84,14 +90,28 @@ export class AuthService {
         id: user.id,
         name: user.name,
         email: user.email,
+        phone: user.phone,
+        address: user.address,
         role: user.role,
+        avatar: user.avatar,
+        isVerified: user.isVerified,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
       },
       token,
     };
   }
 
   async getUserById(id: string) {
-    const user = await User.findById(id).select('-password');
+    const user = await User.findById(id).select('-password -verificationCode -verificationCodeExpires');
+    if (!user) {
+      throw new Error('User not found');
+    }
+    return user;
+  }
+
+  async getUserByEmail(email: string) {
+    const user = await User.findOne({ email }).select('-password -verificationCode -verificationCodeExpires');
     if (!user) {
       throw new Error('User not found');
     }
