@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User';
 
 interface JwtPayload {
-  id: string;
+  _id: string;
 }
 
 export const protect = async (
@@ -33,7 +33,7 @@ export const protect = async (
       process.env.JWT_SECRET as string
     ) as JwtPayload;
 
-    req.user = await User.findById(decoded.id).select('-password');
+    req.user = await User.findById(decoded._id).select('-password -verificationCode -verificationCodeExpires');
 
     if (!req.user) {
       return res.status(401).json({
@@ -41,7 +41,7 @@ export const protect = async (
         message: 'User not found',
       });
     }
-
+    req.user.id = req.user._id;
     next();
   } catch (error) {
     res.status(401).json({
