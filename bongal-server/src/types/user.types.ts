@@ -4,7 +4,7 @@ export interface UserDTO {
   email: string;
   phone: string;
   address?: string;
-  role: 'buyer' | 'seller' | 'admin';
+  role: 'buyer' | 'admin';
   avatar?: string;
 }
 
