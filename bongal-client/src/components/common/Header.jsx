@@ -59,9 +59,17 @@ const Header = () => {
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className="flex items-center space-x-2 hover:text-green-200 transition"
                 >
-                  <div className="bg-white text-green-700 rounded-full w-8 h-8 flex items-center justify-center font-bold">
-                    {user.name[0].toUpperCase()}
-                  </div>
+                  {user.avatar ? (
+                    <img 
+                      src={user.avatar} 
+                      alt={user.name} 
+                      className="w-8 h-8 rounded-full object-cover border-2 border-white"
+                    />
+                  ) : (
+                    <div className="bg-white text-green-700 rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+                      {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                  )}
                   <span className="hidden md:block">{user.name}</span>
                 </button>
 
