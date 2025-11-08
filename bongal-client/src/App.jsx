@@ -13,6 +13,7 @@ import AdminDashboard from './components/admin/AdminDashboard';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import NotFound from './components/common/NotFound';
 import VerifyCodePage from './components/auth/VerifyCodePage';
+import ProfilePage from './components/auth/ProfilePage';
 
 function App() {
   return (
@@ -35,6 +36,14 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route 
+                  path="/profile" 
+                  element={
+                    <ProtectedRoute>
+                      <ProfilePage />
+                    </ProtectedRoute>
+                  } 
+                />
             <Route
               path="admin/*"
               element={
