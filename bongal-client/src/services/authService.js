@@ -23,11 +23,11 @@ export const authService = {
 
   getCurrentUser: async () => {
     const response = await api.get('/auth/me');
-    return response.data;
+    return response.data.user;
   },
 
-  updateProfile: async (userData) => {
-    const response = await api.put('/auth/profile', userData);
+  updateProfile: async (profileData) => {
+    const response = await api.put('/auth/profile', profileData);
     return response.data;
   },
 };
