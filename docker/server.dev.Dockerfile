@@ -4,12 +4,15 @@ WORKDIR /app
 
 RUN npm install -g nodemon
 
-COPY server/package*.json ./
+COPY bongal-server/package*.json ./
 
 RUN npm install --silent
 
-COPY server/ ./
+COPY bongal-server/ ./
 
 EXPOSE 5000
 
-CMD ["npm", "run", "dev"]
+ENV NODE_ENV=development
+ENV PORT=5000
+
+CMD ["nodemon", "--watch", "src", "--ext", "ts,js", "src/server.ts"]

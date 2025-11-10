@@ -6,8 +6,11 @@ COPY bongal-client/package*.json ./
 
 RUN npm install --silent
 
-COPY client/ ./
+COPY bongal-client/ ./
 
-EXPOSE 3000
+EXPOSE 5173
 
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+ENV PORT=5173
+ENV NODE_ENV=development
+
+CMD ["npm", "run", "dev"]

@@ -14,7 +14,6 @@ ENV VITE_API_URL=$VITE_API_URL
 RUN npm run build
 
 FROM nginx:alpine
-
 RUN apk add --no-cache curl
 
 RUN rm /etc/nginx/conf.d/default.conf
@@ -24,7 +23,6 @@ COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 RUN rm -rf /usr/share/nginx/html/*
 
 COPY --from=builder /app/dist /usr/share/nginx/html
-
 
 RUN chmod -R 755 /usr/share/nginx/html && \
     chown -R nginx:nginx /usr/share/nginx/html

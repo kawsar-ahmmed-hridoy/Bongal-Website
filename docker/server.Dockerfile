@@ -10,6 +10,7 @@ COPY bongal-server/ ./
 
 RUN npm run build
 
+
 FROM node:22-alpine
 
 WORKDIR /app
@@ -19,10 +20,8 @@ RUN apk add --no-cache dumb-init curl
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001 -G nodejs
 
-COPY server/package*.json ./
-
-RUN npm ci --only=production --silent && \
-    npm cache clean --force
+COPY bongal-server/package*.json ./
+RUN npm ci --only=production --silent && npm cache clean --force
 
 COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 

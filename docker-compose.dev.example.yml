@@ -5,11 +5,11 @@ services:
     image: mongo:7.0
     container_name: bongal-mongodb-dev
     ports:
-      - "27017:27017"
+      - ""
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: admin123
-      MONGO_INITDB_DATABASE: bongal
+      MONGO_INITDB_ROOT_USERNAME: 
+      MONGO_INITDB_ROOT_PASSWORD: 
+      MONGO_INITDB_DATABASE: Don't know
     volumes:
       - mongodb_dev_data:/data/db
     networks:
@@ -21,22 +21,22 @@ services:
       dockerfile: docker/server.dev.Dockerfile
     container_name: bongal-server-dev
     ports:
-      - "5000:5000"
+      - ""
     environment:
       NODE_ENV: development
-      PORT: 5000
-      MONGODB_URI: mongodb://localhost:27017/bongal
-      JWT_SECRET: redwanwillhandle
+      PORT: 
+      MONGODB_URI: mongodb://mongodb:port/db_name
+      JWT_SECRET: example
       JWT_EXPIRE: 7d
-      CLIENT_URL: http://localhost:3000
+      CLIENT_URL: http://localhost:port
     depends_on:
       - mongodb
     volumes:
-      - ./server:/app
+      - ./bongal-server:/app
       - /app/node_modules
     networks:
       - bongal-dev-network
-    command: npm run dev
+    command: nodemon --watch src --ext ts,js src/example.ts
 
   client:
     build:
@@ -44,17 +44,17 @@ services:
       dockerfile: docker/client.dev.Dockerfile
     container_name: bongal-client-dev
     ports:
-      - "3000:3000"
+      - ""
     environment:
-      VITE_API_URL: http://localhost:5000/api
+      VITE_API_URL: http://localhost:port/api
     depends_on:
       - server
     volumes:
-      - ./client:/app
+      - ./bongal-client:/app
       - /app/node_modules
     networks:
       - bongal-dev-network
-    command: npm run dev -- --host
+    command: npm run dev
 
 volumes:
   mongodb_dev_data:
