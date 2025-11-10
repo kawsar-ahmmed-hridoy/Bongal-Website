@@ -1,0 +1,65 @@
+version: '3.9'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: bongal-mongodb-dev
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+      MONGO_INITDB_DATABASE: bongal
+    volumes:
+      - mongodb_dev_data:/data/db
+    networks:
+      - bongal-dev-network
+
+  server:
+    build:
+      context: .
+      dockerfile: docker/server.dev.Dockerfile
+    container_name: bongal-server-dev
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: development
+      PORT: 5000
+      MONGODB_URI: mongodb://localhost:27017/bongal
+      JWT_SECRET: redwanwillhandle
+      JWT_EXPIRE: 7d
+      CLIENT_URL: http://localhost:3000
+    depends_on:
+      - mongodb
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    networks:
+      - bongal-dev-network
+    command: npm run dev
+
+  client:
+    build:
+      context: .
+      dockerfile: docker/client.dev.Dockerfile
+    container_name: bongal-client-dev
+    ports:
+      - "3000:3000"
+    environment:
+      VITE_API_URL: http://localhost:5000/api
+    depends_on:
+      - server
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    networks:
+      - bongal-dev-network
+    command: npm run dev -- --host
+
+volumes:
+  mongodb_dev_data:
+  server_dev_uploads:
+
+networks:
+  bongal-dev-network:
+    driver: bridge

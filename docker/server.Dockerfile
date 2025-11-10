@@ -1,39 +1,42 @@
-# ========== Stage 1: Build the server ==========
-FROM node:20-alpine AS build
+FROM node:22-alpine AS builder
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# Copy package and lock files
 COPY bongal-server/package*.json ./
-COPY bongal-server/tsconfig.json ./
 
-# Install dependencies
-RUN npm ci
+RUN npm ci --silent
 
-# Copy source files
-COPY bongal-server/ .
+COPY bongal-server/ ./
 
-# Build TypeScript
 RUN npm run build
 
+FROM node:22-alpine
 
-# ========== Stage 2: Run the server ==========
-FROM node:20-alpine
+WORKDIR /app
 
-WORKDIR /usr/src/app
+RUN apk add --no-cache dumb-init curl
 
-# Copy only necessary files from build stage
-COPY --from=build /usr/src/app/dist ./dist
-COPY --from=build /usr/src/app/package*.json ./
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001 -G nodejs
 
-# Install only production dependencies
-RUN npm ci --only=production
+COPY server/package*.json ./
 
-# Copy environment file if needed (optional)
-# COPY bongal-server/.env .env
+RUN npm ci --only=production --silent && \
+    npm cache clean --force
 
-# Expose API port
-EXPOSE 3000
+COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 
-# Start server
+RUN mkdir -p uploads logs && \
+    chown -R nodejs:nodejs uploads logs && \
+    chmod -R 755 uploads logs
+
+USER nodejs
+
+EXPOSE 5000
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:5000/api', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+
+ENTRYPOINT ["dumb-init", "--"]
+
 CMD ["node", "dist/server.js"]
