@@ -8,6 +8,10 @@ const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
   const [isFavorite, setIsFavorite] = React.useState(false);
 
+  if (!product) {
+    return <div className="p-4 border rounded-lg">No product data</div>;
+  }
+
   const handleAddToCart = (e) => {
     e.preventDefault();
     addToCart(product);
