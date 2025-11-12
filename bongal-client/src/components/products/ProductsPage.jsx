@@ -1,10 +1,18 @@
 import { useState } from 'react';
-import { useQuery } from "@tanstack/react-query";
-//import { productService } from '../../services/productService';
+import { useQuery } from '@tanstack/react-query';
+import { productService } from '../../services/productService';
 import ProductCard from '../common/ProductCard';
 import ProductFilters from './ProductFilters';
 import Loader from '../common/Loader';
 import { Search } from 'lucide-react';
+
+const ProductSkeletonGrid = () => (
+  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {Array.from({ length: 6 }).map((_, idx) => (
+      <div key={idx} className="border border-gray-200 rounded-lg p-4 animate-pulse h-48" />
+    ))}
+  </div>
+);
 
 const ProductsPage = () => {
   const [filters, setFilters] = useState({
@@ -15,25 +23,25 @@ const ProductsPage = () => {
     sort: 'newest',
   });
 
-  const { data, isLoading, error } = useQuery(
-    //['products', filters],
-    //() => productService.getAllProducts(filters),
-    { keepPreviousData: true }
-  );
+  const fetchProducts = () => {
+    const params = { ...filters };
+    if (params.category === 'all') delete params.category;
+    if (!params.search) delete params.search;
+    return productService.getAllProducts(params);
+  };
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['products', filters],
+    queryFn: fetchProducts,
+    keepPreviousData: true,
+    staleTime: 1000 * 60 * 5,
+  });
 
   const handleFilterChange = (newFilters) => {
     setFilters({ ...filters, ...newFilters });
   };
 
-  if (isLoading) return <Loader />;
-
-  if (error) return (
-    <div className="text-center py-8 text-red-600">
-      Error loading products. Please try again later.
-    </div>
-  );
-
-  const products = data?.products || [];
+  const products = Array.isArray(data) ? data : data?.products || [];
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -77,7 +85,13 @@ const ProductsPage = () => {
             </select>
           </div>
 
-          {products.length > 0 ? (
+          {isLoading ? (
+            <ProductSkeletonGrid />
+          ) : error ? (
+            <div className="text-center py-8 text-red-600">
+              Error loading products. Please try again later.
+            </div>
+          ) : products.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {products.map((product) => (
                 <ProductCard key={product._id || product.id} product={product} />
