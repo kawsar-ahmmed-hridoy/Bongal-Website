@@ -23,13 +23,15 @@ function App() {
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<HomePage />} />
-            <Route path="cart" element={<CartPage />} />
-            <Route path="register" element={<RegisterPage />} />
-            <Route path="/verify-code" element={<VerifyCodePage />} />
-            <Route path="login" element={<LoginPage />} />
-            <Route path="products/:id" element={<ProductDetail />} />
-            <Route path="products" element={<ProductsPage />} />
-            <Route path="forgot-password" element={<ForgotPassword />} />
+            
+            <Route
+              path="cart"
+              element={
+                <ProtectedRoute>
+                  <CartPage />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="orders"
               element={
@@ -39,13 +41,13 @@ function App() {
               }
             />
             <Route 
-                  path="/profile" 
-                  element={
-                    <ProtectedRoute>
-                      <ProfilePage />
-                    </ProtectedRoute>
-                  } 
-                />
+              path="profile" 
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              } 
+            />
             <Route
               path="admin/*"
               element={
@@ -55,6 +57,13 @@ function App() {
               }
             />
 
+            <Route path="register" element={<RegisterPage />} />
+            <Route path="verify-code" element={<VerifyCodePage />} />
+            <Route path="login" element={<LoginPage />} />
+            <Route path="products/:id" element={<ProductDetail />} />
+            <Route path="products" element={<ProductsPage />} />
+            <Route path="forgot-password" element={<ForgotPassword />} />
+            
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

@@ -1,213 +1,210 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from "@tanstack/react-query";
-import { productService } from '../../services/productService';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { ShoppingCart, Heart, Star, MapPin, Package } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
-import { Star, MapPin, ShoppingCart, Heart, Share2, ChevronLeft } from 'lucide-react';
 import { formatPrice } from '../../utils/helpers';
-import Loader from '../common/Loader';
 
-const ProductDetail = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
+const ProductCard = ({ product, viewMode = 'grid' }) => {
   const { addToCart } = useCart();
-  const [quantity, setQuantity] = useState(1);
-  const [selectedImage, setSelectedImage] = useState(0);
+  const [isFavorite, setIsFavorite] = React.useState(false);
+  const [imageLoaded, setImageLoaded] = React.useState(false);
 
-  const { data: product, isLoading, error } = useQuery({
-    queryKey: ['product', id],
-    queryFn: () => productService.getProductById(id),
-    enabled: !!id,
-    retry: 1
-  });
-
-  if (isLoading) return <Loader />;
-  
-  if (error || !product) {
-    console.error('Product detail error:', error);
+  if (!product) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <div className="bg-white rounded-lg shadow-md p-8 max-w-md mx-auto">
-          <p className="text-xl text-red-600 mb-4">Product not found</p>
-          <p className="text-gray-600 mb-6">The product you're looking for doesn't exist or may have been removed.</p>
-          <button 
-            onClick={() => navigate('/products')} 
-            className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition"
-          >
-            Back to Products
-          </button>
-        </div>
+      <div className="bg-white rounded-2xl border border-gray-200/60 p-6 text-center">
+        <Package className="text-gray-400 mx-auto mb-3" size={32} />
+        <p className="text-gray-600 font-medium">No product data</p>
       </div>
     );
   }
 
-  const images = product.images || (product.image ? [product.image] : []);
-  const mainImage = images[selectedImage] || 'https://via.placeholder.com/400x400?text=No+Image';
-
-  const handleAddToCart = () => {
-    addToCart(product, quantity);
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart(product);
   };
 
-  const handleBuyNow = () => {
-    addToCart(product, quantity);
-    navigate('/cart');
+  const toggleFavorite = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsFavorite(!isFavorite);
   };
+
+  if (viewMode === 'grid') {
+    return (
+      <Link to={`/products/${product.id}`} className="block group">
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-200/60 overflow-hidden hover:shadow-lg transition-all duration-300 h-full flex flex-col group-hover:border-gray-300">
+          <div className="relative h-56 overflow-hidden bg-gray-100">
+            <img
+              src={product.images?.[0] || product.image}
+              alt={product.name}
+              className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${
+                imageLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
+              onLoad={() => setImageLoaded(true)}
+            />
+            {!imageLoaded && (
+              <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
+                <Package className="text-gray-400" size={32} />
+              </div>
+            )}
+            
+            <button
+              onClick={toggleFavorite}
+              className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm p-2.5 rounded-2xl shadow-sm hover:bg-white hover:shadow-md transition-all duration-300"
+            >
+              <Heart
+                size={20}
+                className={isFavorite ? 'text-red-500 fill-red-500' : 'text-gray-600'}
+              />
+            </button>
+
+            {product.stock === 0 && (
+              <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                <span className="text-white font-semibold text-lg bg-gray-900/90 px-4 py-2 rounded-2xl">
+                  Out of Stock
+                </span>
+              </div>
+            )}
+
+            {product.stock > 0 && product.stock < 10 && (
+              <div className="absolute top-4 left-4 bg-orange-500 text-white px-3 py-1.5 rounded-2xl text-xs font-semibold">
+                Only {product.stock} left
+              </div>
+            )}
+          </div>
+
+          <div className="p-5 flex-1 flex flex-col">
+            <div className="flex-1 space-y-3">
+              <h3 className="font-semibold text-gray-900 text-lg leading-tight line-clamp-2 group-hover:text-gray-700 transition-colors">
+                {product.name}
+              </h3>
+              <p className="text-gray-600 text-sm bengali-text leading-relaxed">
+                {product.name_bn}
+              </p>
+
+              <div className="flex items-center space-x-2">
+                <MapPin size={16} className="text-gray-400" />
+                <span className="text-gray-500 text-sm">{product.location}</span>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1">
+                  <Star size={16} className="text-yellow-500 fill-yellow-500" />
+                  <span className="text-sm font-semibold text-gray-900">
+                    {product.rating || '0.0'}
+                  </span>
+                </div>
+                <span className="text-gray-400">•</span>
+                <span className="text-gray-500 text-sm">
+                  ({product.numReviews || product.reviews || 0} reviews)
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-2xl font-bold text-gray-900">
+                  {formatPrice(product.price)}
+                </span>
+              </div>
+
+              <button
+                onClick={handleAddToCart}
+                disabled={product.stock === 0}
+                className="w-full bg-gray-900 text-white py-3.5 rounded-2xl font-semibold hover:bg-gray-800 transition-all duration-300 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center space-x-2 group/button"
+              >
+                <ShoppingCart size={18} className="group-hover/button:scale-110 transition-transform duration-300" />
+                <span>{product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </Link>
+    );
+  }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <button
-        onClick={() => navigate('/products')}
-        className="mb-6 flex items-center space-x-2 text-green-600 hover:text-green-700 transition"
-      >
-        <ChevronLeft size={20} />
-        <span>Back to Products</span>
-      </button>
-
-      <div className="grid md:grid-cols-2 gap-8">
-        <div>
-          <div className="bg-white rounded-lg shadow-md p-4 mb-4">
+    <Link to={`/products/${product.id}`} className="block group">
+      <div className="bg-white rounded-3xl shadow-sm border border-gray-200/60 overflow-hidden hover:shadow-lg transition-all duration-300 group-hover:border-gray-300">
+        <div className="flex">
+          <div className="w-32 h-32 flex-shrink-0 relative overflow-hidden bg-gray-100">
             <img
-              src={mainImage}
+              src={product.images?.[0] || product.image}
               alt={product.name}
-              className="w-full h-96 object-cover rounded-lg"
-              onError={(e) => {
-                e.target.src = 'https://via.placeholder.com/400x400?text=No+Image';
-              }}
+              className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${
+                imageLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
+              onLoad={() => setImageLoaded(true)}
             />
+            {!imageLoaded && (
+              <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
+                <Package className="text-gray-400" size={24} />
+              </div>
+            )}
+            
+            {product.stock === 0 && (
+              <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                <span className="text-white text-xs font-semibold bg-gray-900/90 px-2 py-1 rounded-lg">
+                  Out of Stock
+                </span>
+              </div>
+            )}
           </div>
-          {images.length > 1 && (
-            <div className="flex space-x-2 overflow-x-auto pb-2">
-              {images.map((img, index) => (
+
+          <div className="flex-1 p-5 flex flex-col">
+            <div className="flex-1 space-y-2">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900 text-lg leading-tight group-hover:text-gray-700 transition-colors">
+                    {product.name}
+                  </h3>
+                  <p className="text-gray-600 text-sm bengali-text mt-1">
+                    {product.name_bn}
+                  </p>
+                </div>
                 <button
-                  key={index}
-                  onClick={() => setSelectedImage(index)}
-                  className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 ${
-                    selectedImage === index ? 'border-green-600' : 'border-gray-200'
-                  }`}
+                  onClick={toggleFavorite}
+                  className="flex-shrink-0 ml-3 p-2 hover:bg-gray-100 rounded-2xl transition-colors duration-300"
                 >
-                  <img 
-                    src={img} 
-                    alt={`${product.name} view ${index + 1}`} 
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.target.src = 'https://via.placeholder.com/80x80?text=Image';
-                    }}
+                  <Heart
+                    size={18}
+                    className={isFavorite ? 'text-red-500 fill-red-500' : 'text-gray-400'}
                   />
                 </button>
-              ))}
+              </div>
+
+              <div className="flex items-center space-x-4 text-sm">
+                <div className="flex items-center space-x-1">
+                  <MapPin size={14} className="text-gray-400" />
+                  <span className="text-gray-500">{product.location}</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <Star size={14} className="text-yellow-500 fill-yellow-500" />
+                  <span className="font-semibold text-gray-900">{product.rating || '0.0'}</span>
+                  <span className="text-gray-400">({product.numReviews || 0})</span>
+                </div>
+              </div>
             </div>
-          )}
-        </div>
 
-        <div className="space-y-6">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">{product.name}</h1>
-            <p className="text-xl text-gray-600 bengali-text">{product.name_bn || product.name}</p>
-          </div>
-
-          {product.location && (
-            <div className="flex items-center space-x-2 text-gray-600">
-              <MapPin size={18} />
-              <span>{product.location}</span>
-            </div>
-          )}
-
-          <div className="flex items-center space-x-2">
-            <div className="flex">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  size={20}
-                  className={i < Math.floor(product.rating || 0) ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'}
-                />
-              ))}
-            </div>
-            <span className="font-semibold">{product.rating || '0'}</span>
-            <span className="text-gray-500">({product.numReviews || product.reviews || 0} reviews)</span>
-          </div>
-
-          <div className="border-t border-b py-4">
-            <p className="text-4xl font-bold text-green-600">{formatPrice(product.price)}</p>
-            <p className="text-sm text-gray-600 mt-2">
-              Stock: <span className={`font-semibold ${
-                (product.stock || 0) > 10 ? 'text-green-600' : 
-                (product.stock || 0) > 0 ? 'text-yellow-600' : 'text-red-600'
-              }`}>
-                {product.stock || 0} units available
+            <div className="flex items-center justify-between mt-3">
+              <span className="text-2xl font-bold text-gray-900">
+                {formatPrice(product.price)}
               </span>
-            </p>
-          </div>
-
-          {product.description && (
-            <div>
-              <h3 className="font-bold text-lg mb-2">Description</h3>
-              <p className="text-gray-700 leading-relaxed">{product.description}</p>
-            </div>
-          )}
-
-          {(product.seller?.name || product.seller) && (
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-semibold mb-2">Seller Information</h4>
-              <p className="text-gray-700">
-                Sold by: <span className="font-semibold">{product.seller?.name || product.seller}</span>
-              </p>
-            </div>
-          )}
-
-          <div>
-            <label className="block font-semibold mb-2">Quantity</label>
-            <div className="flex items-center space-x-4">
               <button
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                disabled={quantity <= 1}
-                className="w-10 h-10 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                onClick={handleAddToCart}
+                disabled={product.stock === 0}
+                className="bg-gray-900 text-white px-6 py-2.5 rounded-2xl font-semibold hover:bg-gray-800 transition-all duration-300 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center space-x-2 text-sm"
               >
-                -
-              </button>
-              <span className="text-xl font-semibold w-8 text-center">{quantity}</span>
-              <button
-                onClick={() => setQuantity(Math.min(product.stock || 0, quantity + 1))}
-                disabled={quantity >= (product.stock || 0)}
-                className="w-10 h-10 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition"
-              >
-                +
-              </button>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <button
-              onClick={handleAddToCart}
-              disabled={(product.stock || 0) === 0}
-              className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold hover:bg-green-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-            >
-              <ShoppingCart size={20} />
-              <span>{(product.stock || 0) === 0 ? 'Out of Stock' : 'Add to Cart'}</span>
-            </button>
-            
-            <button
-              onClick={handleBuyNow}
-              disabled={(product.stock || 0) === 0}
-              className="w-full bg-orange-500 text-white py-4 rounded-lg font-semibold hover:bg-orange-600 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
-            >
-              Buy Now
-            </button>
-            
-            <div className="flex space-x-2">
-              <button className="flex-1 border border-gray-300 py-3 rounded-lg hover:bg-gray-50 transition flex items-center justify-center space-x-2">
-                <Heart size={20} />
-                <span>Wishlist</span>
-              </button>
-              <button className="flex-1 border border-gray-300 py-3 rounded-lg hover:bg-gray-50 transition flex items-center justify-center space-x-2">
-                <Share2 size={20} />
-                <span>Share</span>
+                <ShoppingCart size={16} />
+                <span>{product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}</span>
               </button>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 
-export default ProductDetail;
+export default ProductCard;
