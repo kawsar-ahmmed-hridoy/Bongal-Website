@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Mail, Phone, MapPin, Camera, Save, Edit, Shield, Calendar, CheckCircle, XCircle } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Camera, Save, Edit, Shield, Calendar, CheckCircle, XCircle, Package, ShoppingBag, Settings } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const ProfilePage = () => {
@@ -87,62 +87,69 @@ const ProfilePage = () => {
       <div className="container mx-auto px-4 max-w-4xl">
 
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
-          <p className="text-gray-600 mt-2">Manage your account information and preferences</p>
+          <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Profile</h1>
+          <p className="text-gray-600 mt-3 text-lg font-light">Manage your account information and preferences</p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-200/60 overflow-hidden">
 
-          <div className="bg-gradient-to-r from-green-700 to-green-600 p-6 text-white">
-            <div className="flex items-center space-x-4">
+          <div className="bg-gray-900 p-5 text-white">
+            <div className="flex items-center space-x-6">
               <div className="relative">
                 {user.avatar ? (
                   <img 
                     src={user.avatar} 
                     alt={user.name || 'User Avatar'} 
-                    className="w-20 h-20 rounded-full object-cover border-4 border-white"
+                    className="w-24 h-24 rounded-2xl object-cover border-2 border-white"
                   />
                 ) : (
-                  <div className="w-20 h-20 bg-white text-green-700 rounded-full flex items-center justify-center text-2xl font-bold border-4 border-white">
+                  <div className="w-24 h-24 bg-white text-gray-500 rounded-2xl flex items-center justify-center text-2xl font-bold border-4 border-white/20">
                     {getUserInitials()}
                   </div>
                 )}
                 {isEditing && (
-                  <button className="absolute bottom-0 right-0 bg-gray-800 rounded-full p-2 hover:bg-gray-700 transition">
-                    <Camera size={16} className="text-white" />
+                  <button className="absolute -bottom-2 -right-2 bg-gray-800 rounded-xl p-2 hover:bg-gray-700 transition-all duration-300 border border-gray-600">
+                    <Camera size={18} className="text-white" />
                   </button>
                 )}
               </div>
-              <div>
-                <h2 className="text-2xl font-bold">{user.name || 'No Name Provided'}</h2>
-                <p className="text-green-100">{user.email || 'No Email Provided'}</p>
+              <div className="flex-1">
+                <h2 className="text-3xl font-bold tracking-tight">{user.name || 'No Name Provided'}</h2>
+                <p className="text-gray-300 text-lg font-light mt-1">{user.email || 'No Email Provided'}</p>
                 {isAdmin && (
-                  <div className="flex items-center mt-1 text-green-200">
-                    <Shield size={16} className="mr-1" />
-                    <span className="text-sm font-medium">Administrator</span>
+                  <div className="flex items-center mt-3 text-gray-300">
+                    <Shield size={18} className="mr-2" />
+                    <span className="text-sm font-medium bg-white/20 px-3 py-1 rounded-full">Administrator</span>
                   </div>
                 )}
               </div>
             </div>
           </div>
 
-          <div className="p-6">
+          <div className="p-8">
             {message.text && (
-              <div className={`mb-6 p-4 rounded-lg ${
+              <div className={`mb-8 p-4 rounded-2xl ${
                 message.type === 'success' 
                   ? 'bg-green-50 text-green-800 border border-green-200' 
                   : 'bg-red-50 text-red-800 border border-red-200'
               }`}>
-                {message.text}
+                <div className="flex items-center">
+                  {message.type === 'success' ? (
+                    <CheckCircle size={20} className="mr-3" />
+                  ) : (
+                    <XCircle size={20} className="mr-3" />
+                  )}
+                  {message.text}
+                </div>
               </div>
             )}
 
             <form onSubmit={handleSubmit}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 
-                <div className="space-y-2">
-                  <label className="flex items-center text-sm font-medium text-gray-700">
-                    <User size={16} className="mr-2" />
+                <div className="space-y-3">
+                  <label className="flex items-center text-sm font-semibold text-gray-700">
+                    <User size={18} className="mr-3 text-gray-500" />
                     Full Name
                   </label>
                   {isEditing ? (
@@ -151,29 +158,29 @@ const ProfilePage = () => {
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300 bg-white text-gray-900"
                       required
                     />
                   ) : (
-                    <p className="text-gray-900 p-2 bg-gray-50 rounded-lg">
+                    <p className="text-gray-900 p-3 bg-gray-50 rounded-2xl font-medium">
                       {user.name || 'Not provided'}
                     </p>
                   )}
                 </div>
 
-                <div className="space-y-2">
-                  <label className="flex items-center text-sm font-medium text-gray-700">
-                    <Mail size={16} className="mr-2" />
+                <div className="space-y-3">
+                  <label className="flex items-center text-sm font-semibold text-gray-700">
+                    <Mail size={18} className="mr-3 text-gray-500" />
                     Email Address
                   </label>
-                    <p className="text-gray-900 p-2 bg-gray-50 rounded-lg">
-                      {user.email || 'Not provided'}
-                    </p>
+                  <p className="text-gray-900 p-3 bg-gray-50 rounded-2xl font-medium">
+                    {user.email || 'Not provided'}
+                  </p>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="flex items-center text-sm font-medium text-gray-700">
-                    <Phone size={16} className="mr-2" />
+                <div className="space-y-3">
+                  <label className="flex items-center text-sm font-semibold text-gray-700">
+                    <Phone size={18} className="mr-3 text-gray-500" />
                     Phone Number
                   </label>
                   {isEditing ? (
@@ -182,33 +189,35 @@ const ProfilePage = () => {
                       name="phone"
                       value={formData.phone}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300 bg-white text-gray-900"
                     />
                   ) : (
-                    <p className="text-gray-900 p-2 bg-gray-50 rounded-lg">
+                    <p className="text-gray-900 p-3 bg-gray-50 rounded-2xl font-medium">
                       {user.phone || 'Not provided'}
                     </p>
                   )}
                 </div>
 
-                <div className="space-y-2">
-                  <label className="flex items-center text-sm font-medium text-gray-700">
-                    <Shield size={16} className="mr-2" />
+                <div className="space-y-3">
+                  <label className="flex items-center text-sm font-semibold text-gray-700">
+                    <Shield size={18} className="mr-3 text-gray-500" />
                     Account Type
                   </label>
-                  <p className="text-gray-900 p-2 bg-gray-50 rounded-lg capitalize">
-                    {user.role || 'buyer'}
+                  <div className="flex items-center p-3 bg-gray-50 rounded-2xl">
+                    <span className="text-gray-900 font-medium capitalize">
+                      {user.role || 'buyer'}
+                    </span>
                     {isAdmin && (
-                      <span className="ml-2 bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                      <span className="ml-3 bg-gray-900 text-white text-xs px-3 py-1 rounded-full font-medium">
                         Verified
                       </span>
                     )}
-                  </p>
+                  </div>
                 </div>
 
-                <div className="md:col-span-2 space-y-2">
-                  <label className="flex items-center text-sm font-medium text-gray-700">
-                    <MapPin size={16} className="mr-2" />
+                <div className="md:col-span-2 space-y-3">
+                  <label className="flex items-center text-sm font-semibold text-gray-700">
+                    <MapPin size={18} className="mr-3 text-gray-500" />
                     Address
                   </label>
                   {isEditing ? (
@@ -217,20 +226,20 @@ const ProfilePage = () => {
                       value={formData.address}
                       onChange={handleInputChange}
                       rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300 bg-white text-gray-900 resize-none"
                       placeholder="Enter your full address..."
                     />
                   ) : (
-                    <p className="text-gray-900 p-2 bg-gray-50 rounded-lg min-h-[60px]">
+                    <p className="text-gray-900 p-3 bg-gray-50 rounded-2xl font-medium min-h-[60px]">
                       {user.address || 'No address provided'}
                     </p>
                   )}
                 </div>
 
                 {isEditing && (
-                  <div className="md:col-span-2 space-y-2">
-                    <label className="flex items-center text-sm font-medium text-gray-700">
-                      <Camera size={16} className="mr-2" />
+                  <div className="md:col-span-2 space-y-3">
+                    <label className="flex items-center text-sm font-semibold text-gray-700">
+                      <Camera size={18} className="mr-3 text-gray-500" />
                       Avatar URL
                     </label>
                     <input
@@ -238,49 +247,49 @@ const ProfilePage = () => {
                       name="avatar"
                       value={formData.avatar}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300 bg-white text-gray-900"
                       placeholder="Enter image URL for your avatar..."
                     />
                   </div>
                 )}
 
-                <div className="md:col-span-2 border-t pt-6 space-y-3">
-                  <h3 className="font-semibold text-gray-900 mb-3">Account Information</h3>
+                <div className="md:col-span-2 border-t border-gray-200 pt-8 space-y-4">
+                  <h3 className="font-semibold text-gray-900 text-lg mb-4">Account Information</h3>
                   
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
                     <div className="flex items-center">
-                      <Calendar size={16} className="mr-2 text-gray-600" />
-                      <span className="text-sm text-gray-700">Member since</span>
+                      <Calendar size={18} className="mr-3 text-gray-500" />
+                      <span className="text-gray-700 font-medium">Member since</span>
                     </div>
-                    <span className="text-sm text-gray-900">
+                    <span className="text-gray-900 font-medium">
                       {formatDate(user.createdAt)}
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
                     <div className="flex items-center">
-                      <Calendar size={16} className="mr-2 text-gray-600" />
-                      <span className="text-sm text-gray-700">Last updated</span>
+                      <Calendar size={18} className="mr-3 text-gray-500" />
+                      <span className="text-gray-700 font-medium">Last updated</span>
                     </div>
-                    <span className="text-sm text-gray-900">
+                    <span className="text-gray-900 font-medium">
                       {formatDate(user.updatedAt)}
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <span className="text-sm text-gray-700">Email Verification</span>
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
+                    <span className="text-gray-700 font-medium">Email Verification</span>
                     <div className="flex items-center">
                       {user.isVerified ? (
                         <>
-                          <CheckCircle size={16} className="text-green-500 mr-1" />
-                          <span className="text-sm text-green-800 bg-green-100 px-2 py-1 rounded-full">
+                          <CheckCircle size={18} className="text-green-500 mr-2" />
+                          <span className="text-green-800 bg-green-100 px-3 py-1 rounded-full text-sm font-medium">
                             Verified
                           </span>
                         </>
                       ) : (
                         <>
-                          <XCircle size={16} className="text-yellow-500 mr-1" />
-                          <span className="text-sm text-yellow-800 bg-yellow-100 px-2 py-1 rounded-full">
+                          <XCircle size={18} className="text-yellow-500 mr-2" />
+                          <span className="text-yellow-800 bg-yellow-100 px-3 py-1 rounded-full text-sm font-medium">
                             Pending
                           </span>
                         </>
@@ -289,9 +298,9 @@ const ProfilePage = () => {
                   </div>
 
                   {user.verificationCode && (
-                    <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                      <span className="text-sm text-blue-700">Verification Code</span>
-                      <span className="text-sm text-blue-800 bg-blue-100 px-2 py-1 rounded-full">
+                    <div className="flex items-center justify-between p-4 bg-blue-50 rounded-2xl">
+                      <span className="text-blue-700 font-medium">Verification Code</span>
+                      <span className="text-blue-800 bg-blue-100 px-3 py-1 rounded-full text-sm font-medium">
                         Active
                       </span>
                     </div>
@@ -299,12 +308,12 @@ const ProfilePage = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-3 mt-8 pt-6 border-t">
+              <div className="flex justify-end space-x-4 mt-8 pt-8 border-t border-gray-200">
                 {!isEditing ? (
                   <button
                     type="button"
                     onClick={() => setIsEditing(true)}
-                    className="flex items-center px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
+                    className="flex items-center px-8 py-3 bg-gray-900 text-white rounded-2xl hover:bg-gray-800 transition-all duration-300 font-semibold"
                   >
                     <Edit size={18} className="mr-2" />
                     Edit Profile
@@ -323,7 +332,7 @@ const ProfilePage = () => {
                         });
                         setMessage({ type: '', text: '' });
                       }}
-                      className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium"
+                      className="px-8 py-3 border border-gray-300 text-gray-700 rounded-2xl hover:bg-gray-50 transition-all duration-300 font-semibold"
                       disabled={isLoading}
                     >
                       Cancel
@@ -331,7 +340,7 @@ const ProfilePage = () => {
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="flex items-center px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex items-center px-8 py-3 bg-gray-900 text-white rounded-2xl hover:bg-gray-800 transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Save size={18} className="mr-2" />
                       {isLoading ? 'Saving...' : 'Save Changes'}
@@ -343,30 +352,39 @@ const ProfilePage = () => {
           </div>
         </div>
 
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
           <Link
             to="/orders"
-            className="bg-white p-4 rounded-lg shadow hover:shadow-md transition text-center border border-gray-200 hover:border-green-500"
+            className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200/60 hover:border-gray-900 transition-all duration-300 group"
           >
-            <div className="text-green-600 font-semibold">View Orders</div>
-            <div className="text-sm text-gray-600 mt-1">Check your order history</div>
+            <div className="flex items-center justify-center w-12 h-12 bg-gray-900 rounded-xl mb-4 group-hover:scale-110 transition-transform duration-300">
+              <Package size={24} className="text-white" />
+            </div>
+            <div className="text-gray-900 font-semibold text-lg">View Orders</div>
+            <div className="text-gray-600 text-sm mt-2">Check your order history</div>
           </Link>
 
           <Link
             to="/products"
-            className="bg-white p-4 rounded-lg shadow hover:shadow-md transition text-center border border-gray-200 hover:border-green-500"
+            className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200/60 hover:border-gray-900 transition-all duration-300 group"
           >
-            <div className="text-green-600 font-semibold">Continue Shopping</div>
-            <div className="text-sm text-gray-600 mt-1">Browse our products</div>
+            <div className="flex items-center justify-center w-12 h-12 bg-gray-900 rounded-xl mb-4 group-hover:scale-110 transition-transform duration-300">
+              <ShoppingBag size={24} className="text-white" />
+            </div>
+            <div className="text-gray-900 font-semibold text-lg">Continue Shopping</div>
+            <div className="text-gray-600 text-sm mt-2">Browse our products</div>
           </Link>
 
           {isAdmin && (
             <Link
               to="/admin"
-              className="bg-white p-4 rounded-lg shadow hover:shadow-md transition text-center border border-gray-200 hover:border-green-500"
+              className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200/60 hover:border-gray-900 transition-all duration-300 group"
             >
-              <div className="text-green-600 font-semibold">Admin Panel</div>
-              <div className="text-sm text-gray-600 mt-1">Manage your store</div>
+              <div className="flex items-center justify-center w-12 h-12 bg-gray-900 rounded-xl mb-4 group-hover:scale-110 transition-transform duration-300">
+                <Settings size={24} className="text-white" />
+              </div>
+              <div className="text-gray-900 font-semibold text-lg">Admin Panel</div>
+              <div className="text-gray-600 text-sm mt-2">Manage your store</div>
             </Link>
           )}
         </div>
