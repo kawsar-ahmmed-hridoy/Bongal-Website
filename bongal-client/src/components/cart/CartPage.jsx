@@ -11,10 +11,10 @@ const CartPage = () => {
   const navigate = useNavigate();
 
   const handleCheckout = () => {
-    if (!user) {
-      navigate('/login?redirect=/cart');
-      return;
-    }
+    // if (!user) {
+    //   navigate('/login?redirect=/cart');
+    //   return;
+    // }
     navigate('/checkout');
   };
 
