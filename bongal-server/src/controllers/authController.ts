@@ -31,7 +31,7 @@ export const register = async (req: Request, res: Response) => {
     let emailSent = true;
     let emailError = '';
     try {
-      await emailService.sendVerificationEmail(user.email, `Your verification code is: ${verificationCode}`);
+      await emailService.sendVerificationEmail(user.email, verificationCode);
     } catch (error: any) {
       emailSent = false;
       emailError = error.message || 'Failed to send verification email';
@@ -70,6 +70,62 @@ export const verifyCode = async (req: Request, res: Response) => {
     res.json({ success: true, message: 'Email verified successfully' });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message || 'Email verification failed' });
+  }
+};
+
+export const resendVerificationCode = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ success: false, message: 'Email is required' });
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    if (user.isVerified) {
+      return res.status(400).json({ success: false, message: 'Email is already verified' });
+    }
+
+    // Check if user needs to wait (5 minutes cooldown)
+    const lastSentTime = user.verificationCodeExpires ? new Date(user.verificationCodeExpires).getTime() - (15 * 60 * 1000) : 0;
+    const now = Date.now();
+    const timeSinceLastSent = now - lastSentTime;
+    const fiveMinutes = 5 * 60 * 1000;
+
+    if (timeSinceLastSent < fiveMinutes) {
+      const waitTime = Math.ceil((fiveMinutes - timeSinceLastSent) / 1000 / 60);
+      return res.status(429).json({
+        success: false,
+        message: `Please wait ${waitTime} minute(s) before requesting a new code`,
+        waitTime
+      });
+    }
+
+    // Generate new code
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const codeExpiry = new Date(Date.now() + 15 * 60 * 1000);
+
+    user.verificationCode = verificationCode;
+    user.verificationCodeExpires = codeExpiry;
+    await user.save();
+
+    // Send email
+    try {
+      await emailService.sendVerificationEmail(user.email, verificationCode);
+      res.json({
+        success: true,
+        message: 'Verification code sent to your email',
+        emailSent: true
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to send verification email',
+        emailSent: false,
+        error: error.message
+      });
+    }
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message || 'Failed to resend verification code' });
   }
 };
 

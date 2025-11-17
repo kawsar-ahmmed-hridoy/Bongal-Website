@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { User, Mail, Phone, MapPin, Camera, Save, Edit, Shield, Calendar, CheckCircle, XCircle, Package, ShoppingBag, Settings } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { authService } from '../../services/authService';
+import toast from 'react-hot-toast';
 
 const ProfilePage = () => {
   const { user, updateProfile, isAdmin } = useAuth();
@@ -16,6 +18,10 @@ const ProfilePage = () => {
     avatar: '',
   });
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [showVerification, setShowVerification] = useState(false);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [sendingCode, setSendingCode] = useState(false);
+  const [verifyingCode, setVerifyingCode] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -77,6 +83,41 @@ const ProfilePage = () => {
     return (names[0][0] + names[names.length - 1][0]).toUpperCase();
   };
 
+  const handleSendVerificationCode = async () => {
+    setSendingCode(true);
+    try {
+      await authService.resendVerification(user.email);
+      setShowVerification(true);
+      toast.success('Verification code sent to your email!');
+    } catch (error) {
+      const errorMsg = error.response?.data?.message || 'Failed to send verification code';
+      toast.error(errorMsg);
+    } finally {
+      setSendingCode(false);
+    }
+  };
+
+  const handleVerifyCode = async (e) => {
+    e.preventDefault();
+    if (!verificationCode.trim()) {
+      toast.error('Please enter verification code');
+      return;
+    }
+
+    setVerifyingCode(true);
+    try {
+      await authService.verifyEmail(user.email, verificationCode);
+      toast.success('Email verified successfully!');
+      setShowVerification(false);
+      setVerificationCode('');
+      window.location.reload(); // Reload to update user state
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Invalid or expired code');
+    } finally {
+      setVerifyingCode(false);
+    }
+  };
+
   if (!user) {
     navigate('/login');
     return null;
@@ -116,10 +157,15 @@ const ProfilePage = () => {
               <div className="flex-1">
                 <div className="flex items-center space-x-3">
                   <h2 className="text-3xl font-bold tracking-tight">{user.name || 'No Name Provided'}</h2>
-                  {user.isVerified && (
+                  {user.isVerified ? (
                     <div className="flex items-center bg-accent-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
                       <CheckCircle size={16} className="mr-1" />
                       Verified
+                    </div>
+                  ) : (
+                    <div className="flex items-center bg-gray-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                      <XCircle size={16} className="mr-1" />
+                      Not Verified
                     </div>
                   )}
                 </div>
@@ -130,15 +176,66 @@ const ProfilePage = () => {
                     <span className="text-sm font-medium bg-white/20 px-3 py-1 rounded-full">Administrator</span>
                   </div>
                 )}
+                {!user.isVerified && (
+                  <button
+                    onClick={handleSendVerificationCode}
+                    disabled={sendingCode}
+                    className="mt-3 flex items-center bg-accent-600 hover:bg-accent-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors disabled:bg-gray-600"
+                  >
+                    <Mail size={16} className="mr-2" />
+                    {sendingCode ? 'Sending...' : 'Verify Email'}
+                  </button>
+                )}
               </div>
             </div>
           </div>
 
+          {/* Verification Section */}
+          {!user.isVerified && showVerification && (
+            <div className="border-t border-gray-200 p-6 bg-accent-50">
+              <div className="max-w-md mx-auto">
+                <h3 className="text-lg font-bold text-gray-900 mb-3">Email Verification</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Enter the 6-digit code sent to <span className="font-semibold">{user.email}</span>
+                </p>
+                <form onSubmit={handleVerifyCode} className="space-y-3">
+                  <input
+                    type="text"
+                    value={verificationCode}
+                    onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder="Enter 6-digit code"
+                    className="w-full px-4 py-3 border border-primary-300 rounded-2xl focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition-all text-center text-xl tracking-widest"
+                    maxLength={6}
+                  />
+                  <div className="flex space-x-3">
+                    <button
+                      type="submit"
+                      disabled={verifyingCode || verificationCode.length !== 6}
+                      className="flex-1 bg-primary-800 text-white py-3 rounded-2xl font-semibold hover:bg-primary-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                    >
+                      {verifyingCode ? 'Verifying...' : 'Verify'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowVerification(false)}
+                      className="px-6 bg-gray-200 text-gray-700 py-3 rounded-2xl font-semibold hover:bg-gray-300 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+                <p className="text-xs text-gray-500 mt-3 text-center">
+                  Code expires in 15 minutes. Wait 5 minutes before requesting a new code.
+                </p>
+              </div>
+            </div>
+          )}
+
           <div className="p-8">
             {message.text && (
               <div className={`mb-8 p-4 rounded-2xl ${message.type === 'success'
-                  ? 'bg-green-50 text-green-800 border border-green-200'
-                  : 'bg-red-50 text-red-800 border border-red-200'
+                ? 'bg-green-50 text-green-800 border border-green-200'
+                : 'bg-red-50 text-red-800 border border-red-200'
                 }`}>
                 <div className="flex items-center">
                   {message.type === 'success' ? (

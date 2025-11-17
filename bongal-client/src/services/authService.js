@@ -40,4 +40,14 @@ export const authService = {
     const response = await api.post('/auth/reset-password', { email, code, newPassword });
     return response.data;
   },
+
+  verifyEmail: async (email, code) => {
+    const response = await api.post('/auth/verify-code', { email, code });
+    return response.data;
+  },
+
+  resendVerification: async (email) => {
+    const response = await api.post('/auth/resend-verification', { email });
+    return response.data;
+  },
 };
