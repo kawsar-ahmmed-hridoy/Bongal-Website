@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingCart, User, Menu, X, Package, LogOut } from 'lucide-react';
+import { ShoppingCart, User, Menu, X, Package, LogOut, CheckCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 
@@ -149,7 +149,12 @@ const Header = () => {
                 {showUserMenu && (
                   <div className="absolute right-0 mt-2 w-56 bg-cream-100 rounded-2xl shadow-soft-lg py-2 text-primary-900 border border-primary-100 backdrop-blur-md">
                     <div className="px-4 py-3 border-b border-primary-100">
-                      <p className="font-semibold text-primary-900">{user.name}</p>
+                      <div className="flex items-center space-x-2">
+                        <p className="font-semibold text-primary-900">{user.name}</p>
+                        {user.isVerified && (
+                          <CheckCircle size={16} className="text-accent-600" title="Verified" />
+                        )}
+                      </div>
                       <p className="text-sm text-primary-700">{user.email}</p>
                     </div>
                     <Link

@@ -46,7 +46,7 @@ const RegisterPage = () => {
     setLoading(true);
 
     try {
-      await register({
+      const response = await register({
         name: formData.name,
         email: formData.email,
         password: formData.password,
@@ -55,6 +55,11 @@ const RegisterPage = () => {
       });
 
       setVerificationSent(true);
+
+      // Show warning if email wasn't sent
+      if (response && !response.emailSent && response.emailError) {
+        setErrors({ submit: `Registration successful, but email verification failed: ${response.emailError}` });
+      }
     } catch (err) {
       setErrors({ submit: err.response?.data?.message || 'Registration failed' });
     } finally {
@@ -68,32 +73,31 @@ const RegisterPage = () => {
     setShowPassword(!showPassword);
   };
 
-  useEffect(() => {
-    if (verificationSent) {
-      const timer = setTimeout(() => {
-        navigate(`/verify-code?email=${encodeURIComponent(formData.email)}`);
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [verificationSent, navigate, formData.email]);
-
   if (verificationSent) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex items-center justify-center px-4 py-8">
+      <div className="min-h-screen bg-gradient-to-b from-cream-100 to-primary-50 flex items-center justify-center px-4 py-8">
         <div className="max-w-md w-full text-center space-y-6">
-          <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-200/60">
+          <div className="bg-cream-100 p-8 rounded-3xl shadow-soft border border-primary-100">
             <div className="flex justify-center mb-6">
-              <div className="bg-gray-900 p-3 rounded-2xl">
+              <div className="bg-primary-800 p-3 rounded-2xl">
                 <Shield className="text-white" size={32} />
               </div>
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-4 tracking-tight">Verify Your Email</h2>
-            <p className="text-gray-600 text-lg font-light leading-relaxed">
-              A verification email has been sent to <strong className="text-gray-900">{formData.email}</strong>
+            <h2 className="text-3xl font-bold text-primary-900 mb-4 tracking-tight">Registration Successful!</h2>
+            <p className="text-primary-700 text-lg font-light leading-relaxed">
+              Your account has been created successfully.
             </p>
-            <p className="text-gray-500 mt-4 text-sm">
-              You will be redirected shortly to the verification page.
-            </p>
+            {errors.submit && (
+              <div className="mt-4 p-4 bg-accent-50 border border-accent-200 rounded-2xl text-accent-800 text-sm font-medium">
+                ⚠️ {errors.submit}
+              </div>
+            )}
+            <Link
+              to="/login"
+              className="mt-6 w-full inline-block bg-primary-800 text-white py-3.5 rounded-2xl font-semibold hover:bg-primary-900 shadow-soft transition-all duration-300"
+            >
+              Sign In
+            </Link>
           </div>
         </div>
       </div>
@@ -138,9 +142,8 @@ const RegisterPage = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 ${
-                    errors.name ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full pl-10 pr-4 py-3 border rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 ${errors.name ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   placeholder="Enter your full name"
                 />
               </div>
@@ -160,9 +163,8 @@ const RegisterPage = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 ${
-                    errors.email ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full pl-10 pr-4 py-3 border rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 ${errors.email ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   placeholder="your@email.com"
                 />
               </div>
@@ -182,9 +184,8 @@ const RegisterPage = () => {
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 ${
-                    errors.phone ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full pl-10 pr-4 py-3 border rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 ${errors.phone ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   placeholder="01XXXXXXXXX"
                 />
               </div>
@@ -204,9 +205,8 @@ const RegisterPage = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 ${
-                    errors.password ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full pl-10 pr-12 py-3 border rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 ${errors.password ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   placeholder="••••••••"
                 />
                 <button
@@ -234,9 +234,8 @@ const RegisterPage = () => {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 ${
-                    errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full pl-10 pr-4 py-3 border rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   placeholder="••••••••"
                 />
               </div>
@@ -282,8 +281,8 @@ const RegisterPage = () => {
           </div>
 
           <div className="text-center">
-            <Link 
-              to="/login" 
+            <Link
+              to="/login"
               className="inline-flex items-center space-x-2 text-gray-900 font-semibold hover:text-gray-700 transition-colors duration-300 group"
             >
               <span>Sign in to your account</span>

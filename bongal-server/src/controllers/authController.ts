@@ -28,12 +28,21 @@ export const register = async (req: Request, res: Response) => {
       verificationCodeExpires: codeExpiry,
     });
 
-    await emailService.sendVerificationEmail(user.email, `Your verification code is: ${verificationCode}`);
+    let emailSent = true;
+    let emailError = '';
+    try {
+      await emailService.sendVerificationEmail(user.email, `Your verification code is: ${verificationCode}`);
+    } catch (error: any) {
+      emailSent = false;
+      emailError = error.message || 'Failed to send verification email';
+    }
 
     res.status(201).json({
       success: true,
-      message: 'User registered successfully. Please check your email for verification code.',
-      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+      message: 'Registration successful! You can now login.',
+      emailSent,
+      emailError: emailSent ? undefined : emailError,
+      user: { id: user._id, name: user.name, email: user.email, role: user.role, isVerified: user.isVerified },
     });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message || 'Registration failed' });
@@ -70,7 +79,6 @@ export const login = async (req: Request, res: Response) => {
 
     const user = await User.findOne({ email }).select('+password');
     if (!user) return res.status(401).json({ success: false, message: 'Invalid email or password' });
-    if (!user.isVerified) return res.status(401).json({ success: false, message: 'Please verify your email first' });
 
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) return res.status(401).json({ success: false, message: 'Invalid email or password' });

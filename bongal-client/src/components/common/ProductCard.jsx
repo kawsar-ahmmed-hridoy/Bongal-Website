@@ -32,7 +32,7 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
 
   if (viewMode === 'grid') {
     return (
-      <Link to={`/products/${product.id}`} className="block group">
+      <Link to={`/products/${product._id || product.id}`} className="block group">
         <div className="bg-cream-100 rounded-3xl shadow-soft border border-primary-100 overflow-hidden hover:shadow-soft-lg transition-all duration-300 h-full flex flex-col group-hover:border-primary-200">
           <div className="relative h-56 overflow-hidden bg-primary-50">
             <img
@@ -124,7 +124,7 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
   }
 
   return (
-    <Link to={`/products/${product.id}`} className="block group">
+    <Link to={`/products/${product._id || product.id}`} className="block group">
       <div className="bg-cream-100 rounded-3xl shadow-soft border border-primary-100 overflow-hidden hover:shadow-soft-lg transition-all duration-300 group-hover:border-primary-200">
         <div className="flex">
           <div className="w-32 h-32 flex-shrink-0 relative overflow-hidden bg-primary-50">

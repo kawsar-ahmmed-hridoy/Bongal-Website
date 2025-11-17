@@ -55,7 +55,7 @@ const ProfilePage = () => {
 
   const formatDate = (dateString) => {
     if (!dateString) return 'Not available';
-    
+
     try {
       return new Date(dateString).toLocaleDateString('en-US', {
         year: 'numeric',
@@ -63,13 +63,13 @@ const ProfilePage = () => {
         day: 'numeric'
       });
     } catch (e) {
-      return 'Invalid date'+e;
+      return 'Invalid date' + e;
     }
   };
 
   const getUserInitials = () => {
     if (!user?.name) return <User size={32} />;
-    
+
     const names = user.name.split(' ');
     if (names.length === 1) {
       return names[0][0].toUpperCase();
@@ -97,9 +97,9 @@ const ProfilePage = () => {
             <div className="flex items-center space-x-6">
               <div className="relative">
                 {user.avatar ? (
-                  <img 
-                    src={user.avatar} 
-                    alt={user.name || 'User Avatar'} 
+                  <img
+                    src={user.avatar}
+                    alt={user.name || 'User Avatar'}
                     className="w-24 h-24 rounded-2xl object-cover border-2 border-white"
                   />
                 ) : (
@@ -114,7 +114,15 @@ const ProfilePage = () => {
                 )}
               </div>
               <div className="flex-1">
-                <h2 className="text-3xl font-bold tracking-tight">{user.name || 'No Name Provided'}</h2>
+                <div className="flex items-center space-x-3">
+                  <h2 className="text-3xl font-bold tracking-tight">{user.name || 'No Name Provided'}</h2>
+                  {user.isVerified && (
+                    <div className="flex items-center bg-accent-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                      <CheckCircle size={16} className="mr-1" />
+                      Verified
+                    </div>
+                  )}
+                </div>
                 <p className="text-gray-300 text-lg font-light mt-1">{user.email || 'No Email Provided'}</p>
                 {isAdmin && (
                   <div className="flex items-center mt-3 text-gray-300">
@@ -128,11 +136,10 @@ const ProfilePage = () => {
 
           <div className="p-8">
             {message.text && (
-              <div className={`mb-8 p-4 rounded-2xl ${
-                message.type === 'success' 
-                  ? 'bg-green-50 text-green-800 border border-green-200' 
+              <div className={`mb-8 p-4 rounded-2xl ${message.type === 'success'
+                  ? 'bg-green-50 text-green-800 border border-green-200'
                   : 'bg-red-50 text-red-800 border border-red-200'
-              }`}>
+                }`}>
                 <div className="flex items-center">
                   {message.type === 'success' ? (
                     <CheckCircle size={20} className="mr-3" />
@@ -146,7 +153,7 @@ const ProfilePage = () => {
 
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                
+
                 <div className="space-y-3">
                   <label className="flex items-center text-sm font-semibold text-gray-700">
                     <User size={18} className="mr-3 text-gray-500" />
@@ -255,7 +262,7 @@ const ProfilePage = () => {
 
                 <div className="md:col-span-2 border-t border-gray-200 pt-8 space-y-4">
                   <h3 className="font-semibold text-gray-900 text-lg mb-4">Account Information</h3>
-                  
+
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
                     <div className="flex items-center">
                       <Calendar size={18} className="mr-3 text-gray-500" />
