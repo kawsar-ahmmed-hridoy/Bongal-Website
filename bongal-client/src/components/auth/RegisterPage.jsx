@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Eye, EyeOff, ArrowRight, User, Mail, Phone, MapPin, Lock, Shield } from 'lucide-react';
+import { Eye, EyeOff, ArrowRight, User, Mail, Phone, MapPin, Lock, Shield, CheckCircle } from 'lucide-react';
 import { validateEmail, validatePhone, validatePassword } from '../../utils/validation';
+import { authService } from '../../services/authService';
+import toast from 'react-hot-toast';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -17,8 +19,12 @@ const RegisterPage = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
+  const [userPassword, setUserPassword] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [verifyingCode, setVerifyingCode] = useState(false);
 
-  const { register } = useAuth();
+  const { register, login } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -54,16 +60,55 @@ const RegisterPage = () => {
         address: formData.address,
       });
 
+      setUserEmail(formData.email);
+      setUserPassword(formData.password);
       setVerificationSent(true);
 
       // Show warning if email wasn't sent
       if (response && !response.emailSent && response.emailError) {
-        setErrors({ submit: `Registration successful, but email verification failed: ${response.emailError}` });
+        toast.error(`Email verification failed: ${response.emailError}`);
+      } else if (response.emailSent) {
+        toast.success('Verification code sent to your email!');
       }
     } catch (err) {
       setErrors({ submit: err.response?.data?.message || 'Registration failed' });
+      toast.error(err.response?.data?.message || 'Registration failed');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleVerifyCode = async (e) => {
+    e.preventDefault();
+    if (!verificationCode.trim()) {
+      toast.error('Please enter verification code');
+      return;
+    }
+
+    setVerifyingCode(true);
+    try {
+      await authService.verifyEmail(userEmail, verificationCode);
+      toast.success('Email verified successfully!');
+
+      // Auto login after verification
+      await login({ email: userEmail, password: userPassword });
+      toast.success('Welcome! You are now logged in.');
+      navigate('/');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Invalid or expired code');
+    } finally {
+      setVerifyingCode(false);
+    }
+  };
+
+  const handleSkipVerification = async () => {
+    try {
+      await login({ email: userEmail, password: userPassword });
+      toast.success('Welcome! You can verify your email later from your profile.');
+      navigate('/');
+    } catch (err) {
+      toast.error('Failed to log in. Please try logging in manually.');
+      navigate('/login');
     }
   };
 
@@ -76,28 +121,57 @@ const RegisterPage = () => {
   if (verificationSent) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-cream-100 to-primary-50 flex items-center justify-center px-4 py-8">
-        <div className="max-w-md w-full text-center space-y-6">
-          <div className="bg-cream-100 p-8 rounded-3xl shadow-soft border border-primary-100">
+        <div className="max-w-md w-full space-y-6">
+          <div className="bg-white p-8 rounded-3xl shadow-soft border border-primary-100">
             <div className="flex justify-center mb-6">
               <div className="bg-primary-800 p-3 rounded-2xl">
-                <Shield className="text-white" size={32} />
+                <Mail className="text-white" size={32} />
               </div>
             </div>
-            <h2 className="text-3xl font-bold text-primary-900 mb-4 tracking-tight">Registration Successful!</h2>
-            <p className="text-primary-700 text-lg font-light leading-relaxed">
-              Your account has been created successfully.
+            <h2 className="text-3xl font-bold text-gray-900 mb-4 text-center tracking-tight">
+              Check Your Email
+            </h2>
+            <p className="text-gray-600 text-center mb-6">
+              We've sent a 6-digit verification code to<br />
+              <span className="font-semibold text-primary-800">{userEmail}</span>
             </p>
-            {errors.submit && (
-              <div className="mt-4 p-4 bg-accent-50 border border-accent-200 rounded-2xl text-accent-800 text-sm font-medium">
-                ⚠️ {errors.submit}
+
+            <form onSubmit={handleVerifyCode} className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Verification Code
+                </label>
+                <input
+                  type="text"
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="Enter 6-digit code"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition-all text-center text-2xl tracking-widest"
+                  maxLength={6}
+                />
               </div>
-            )}
-            <Link
-              to="/login"
-              className="mt-6 w-full inline-block bg-primary-800 text-white py-3.5 rounded-2xl font-semibold hover:bg-primary-900 shadow-soft transition-all duration-300"
-            >
-              Sign In
-            </Link>
+
+              <button
+                type="submit"
+                disabled={verifyingCode || verificationCode.length !== 6}
+                className="w-full bg-primary-800 text-white py-3.5 rounded-2xl font-semibold hover:bg-primary-700 transition-all duration-300 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              >
+                <CheckCircle size={20} />
+                <span>{verifyingCode ? 'Verifying...' : 'Verify Email'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSkipVerification}
+                className="w-full bg-cream-100 text-primary-800 py-3 rounded-2xl font-semibold hover:bg-cream-200 transition-all duration-300"
+              >
+                Skip for Now
+              </button>
+            </form>
+
+            <p className="text-sm text-gray-500 text-center mt-6">
+              Code expires in 15 minutes
+            </p>
           </div>
         </div>
       </div>

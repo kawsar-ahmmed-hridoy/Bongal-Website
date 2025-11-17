@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { productService } from '../../services/productService';
-import { Plus, Edit, Trash2, Package, Image, DollarSign, Hash, MapPin, FileText, X, Save, ArrowLeft } from 'lucide-react';
+import { Plus, Edit, Trash2, Package, Image, DollarSign, Hash, MapPin, FileText, X, Save, ArrowLeft, Play } from 'lucide-react';
 import { CATEGORIES } from '../../utils/constants';
 import { formatPrice } from '../../utils/helpers';
 
@@ -14,14 +14,15 @@ const ProductManagement = () => {
     name_bn: '',
     price: '',
     category: 'honey',
-    image: '',
+    images: [''],
     stock: '',
     description: '',
     location: '',
+    video: '',
   });
 
   const queryClient = useQueryClient();
-  
+
   const { data: products, isLoading, error } = useQuery({
     queryKey: ['admin-products'],
     queryFn: () => productService.getAllProducts({}),
@@ -58,10 +59,11 @@ const ProductManagement = () => {
       name_bn: '',
       price: '',
       category: 'honey',
-      image: '',
+      images: [''],
       stock: '',
       description: '',
       location: '',
+      video: '',
     });
     setEditingProduct(null);
     setShowForm(false);
@@ -69,32 +71,37 @@ const ProductManagement = () => {
 
   const handleEdit = (product) => {
     setEditingProduct(product);
+    const productImages = product.images && product.images.length > 0
+      ? product.images
+      : product.image ? [product.image] : [''];
     setFormData({
       name: product.name || '',
       name_bn: product.name_bn || '',
       price: product.price || '',
       category: product.category || 'honey',
-      image: product.images?.[0] || product.image || '',
+      images: productImages,
       stock: product.stock || '',
       description: product.description || '',
       location: product.location || '',
+      video: product.video || '',
     });
     setShowForm(true);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const filteredImages = formData.images.filter(img => img.trim() !== '');
     const data = {
       ...formData,
       price: parseFloat(formData.price),
       stock: parseInt(formData.stock),
-      images: [formData.image],
+      images: filteredImages,
     };
 
     if (editingProduct) {
-      updateMutation.mutate({ 
-        id: editingProduct.id || editingProduct._id, 
-        data 
+      updateMutation.mutate({
+        id: editingProduct.id || editingProduct._id,
+        data
       });
     } else {
       createMutation.mutate(data);
@@ -130,7 +137,7 @@ const ProductManagement = () => {
         </div>
         <h3 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Products</h3>
         <p className="text-gray-600 mb-4">Please try again later</p>
-        <button 
+        <button
           onClick={() => window.location.reload()}
           className="bg-gray-900 text-white px-6 py-3 rounded-2xl font-semibold hover:bg-gray-800 transition-all duration-300"
         >
@@ -146,8 +153,8 @@ const ProductManagement = () => {
         <div>
           <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Product Management</h1>
           <p className="text-gray-600 text-lg font-light mt-2">
-            {productsList.length > 0 
-              ? `Managing ${productsList.length} products` 
+            {productsList.length > 0
+              ? `Managing ${productsList.length} products`
               : 'No products yet. Add your first product to get started.'}
           </p>
         </div>
@@ -211,14 +218,17 @@ const ProductManagement = () => {
                 Price (৳) *
               </label>
               <input
-                type="number"
-                placeholder="0.00"
+                type="text"
+                placeholder="Enter price (e.g., 299.99)"
                 value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                    setFormData({ ...formData, price: value });
+                  }
+                }}
                 className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300"
                 required
-                min="0"
-                step="0.01"
               />
             </div>
 
@@ -240,19 +250,51 @@ const ProductManagement = () => {
               </select>
             </div>
 
-            <div className="space-y-2">
-              <label className="flex items-center text-sm font-semibold text-gray-700">
-                <Image size={16} className="mr-2 text-gray-500" />
-                Image URL *
-              </label>
-              <input
-                type="url"
-                placeholder="https://example.com/image.jpg"
-                value={formData.image}
-                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300"
-                required
-              />
+            <div className="md:col-span-2 space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="flex items-center text-sm font-semibold text-gray-700">
+                  <Image size={16} className="mr-2 text-gray-500" />
+                  Product Images *
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, images: [...formData.images, ''] })}
+                  className="bg-primary-800 text-white px-3 py-1.5 rounded-xl text-sm font-semibold hover:bg-primary-700 transition-colors flex items-center space-x-1"
+                >
+                  <Plus size={16} />
+                  <span>Add Image</span>
+                </button>
+              </div>
+              <div className="space-y-2">
+                {formData.images.map((image, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <input
+                      type="url"
+                      placeholder={`Image URL ${index + 1} (https://example.com/image.jpg)`}
+                      value={image}
+                      onChange={(e) => {
+                        const newImages = [...formData.images];
+                        newImages[index] = e.target.value;
+                        setFormData({ ...formData, images: newImages });
+                      }}
+                      className="flex-1 px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition-all duration-300"
+                      required={index === 0}
+                    />
+                    {formData.images.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newImages = formData.images.filter((_, i) => i !== index);
+                          setFormData({ ...formData, images: newImages });
+                        }}
+                        className="p-3 text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -261,13 +303,17 @@ const ProductManagement = () => {
                 Stock Quantity *
               </label>
               <input
-                type="number"
-                placeholder="0"
+                type="text"
+                placeholder="Enter stock quantity (e.g., 100)"
                 value={formData.stock}
-                onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '' || /^\d+$/.test(value)) {
+                    setFormData({ ...formData, stock: value });
+                  }
+                }}
                 className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300"
                 required
-                min="0"
               />
             </div>
 
@@ -283,6 +329,20 @@ const ProductManagement = () => {
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300"
                 required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="flex items-center text-sm font-semibold text-gray-700">
+                <Play size={16} className="mr-2 text-gray-500" />
+                Video URL (Optional)
+              </label>
+              <input
+                type="url"
+                placeholder="https://youtube.com/watch?v=..."
+                value={formData.video}
+                onChange={(e) => setFormData({ ...formData, video: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300"
               />
             </div>
 
@@ -309,10 +369,10 @@ const ProductManagement = () => {
               >
                 <Save size={20} className="group-hover:scale-110 transition-transform duration-300" />
                 <span>
-                  {(createMutation.isLoading || updateMutation.isLoading) 
-                    ? 'Saving...' 
-                    : editingProduct 
-                      ? 'Update Product' 
+                  {(createMutation.isLoading || updateMutation.isLoading)
+                    ? 'Saving...'
+                    : editingProduct
+                      ? 'Update Product'
                       : 'Add Product'
                   }
                 </span>
@@ -373,13 +433,12 @@ const ProductManagement = () => {
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`px-3 py-1.5 rounded-full text-sm font-semibold ${
-                          product.stock > 10
+                        className={`px-3 py-1.5 rounded-full text-sm font-semibold ${product.stock > 10
                             ? 'bg-green-100 text-green-800'
                             : product.stock > 0
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-red-100 text-red-800'
+                          }`}
                       >
                         {product.stock} units
                       </span>

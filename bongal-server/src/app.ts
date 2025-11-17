@@ -7,6 +7,8 @@ import orderRoutes from './routes/orderRoutes';
 import userRoutes from './routes/userRoutes';
 import paymentRoutes from './routes/paymentRoutes';
 import uploadRoutes from './routes/uploadRoutes';
+import reviewRoutes from './routes/reviewRoutes';
+import testRoutes from './routes/testRoutes';
 import { errorHandler } from './middleware/errorHandler';
 
 dotenv.config();
@@ -31,6 +33,7 @@ app.get('/api', (req: Request, res: Response) => {
       users: '/api/users',
       payment: '/api/payment',
       upload: '/api/upload',
+      reviews: '/api/reviews',
     },
   });
 });
@@ -41,6 +44,12 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/reviews', reviewRoutes);
+
+// Test routes (only in development)
+if (process.env.NODE_ENV === 'development') {
+  app.use('/api/test', testRoutes);
+}
 
 app.use(errorHandler);
 
