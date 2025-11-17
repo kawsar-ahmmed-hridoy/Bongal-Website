@@ -38,9 +38,8 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
             <img
               src={product.images?.[0] || product.image}
               alt={product.name}
-              className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${
-                imageLoaded ? 'opacity-100' : 'opacity-0'
-              }`}
+              className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
               onLoad={() => setImageLoaded(true)}
             />
             {!imageLoaded && (
@@ -48,7 +47,7 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
                 <Package className="text-gray-400" size={32} />
               </div>
             )}
-            
+
             <button
               onClick={toggleFavorite}
               className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm p-2.5 rounded-2xl shadow-sm hover:bg-white hover:shadow-md transition-all duration-300"
@@ -132,9 +131,8 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
             <img
               src={product.images?.[0] || product.image}
               alt={product.name}
-              className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${
-                imageLoaded ? 'opacity-100' : 'opacity-0'
-              }`}
+              className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
               onLoad={() => setImageLoaded(true)}
             />
             {!imageLoaded && (
@@ -142,7 +140,7 @@ const ProductCard = ({ product, viewMode = 'grid' }) => {
                 <Package className="text-gray-400" size={24} />
               </div>
             )}
-            
+
             {product.stock === 0 && (
               <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                 <span className="text-white text-xs font-semibold bg-gray-900/90 px-2 py-1 rounded-lg">
