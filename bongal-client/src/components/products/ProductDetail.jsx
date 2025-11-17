@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ShoppingCart,
   Heart,
@@ -12,27 +12,53 @@ import {
   Play,
   Minus,
   Plus,
-  ArrowLeft
+  ArrowLeft,
+  Send
 } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 import { formatPrice } from '../../utils/helpers';
 import { productService } from '../../services/productService';
+import { reviewService } from '../../services/reviewService';
 import Loader from '../common/Loader';
+import toast from 'react-hot-toast';
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
 
   const { data: product, isLoading, error } = useQuery({
     queryKey: ['product', id],
     queryFn: () => productService.getProductById(id),
     enabled: !!id,
     retry: 1
+  });
+
+  const { data: reviews = [], isLoading: reviewsLoading } = useQuery({
+    queryKey: ['reviews', id],
+    queryFn: () => reviewService.getProductReviews(id),
+    enabled: !!id
+  });
+
+  const createReviewMutation = useMutation({
+    mutationFn: (reviewData) => reviewService.createReview(id, reviewData),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['reviews', id]);
+      queryClient.invalidateQueries(['product', id]);
+      setNewReview({ rating: 5, comment: '' });
+      toast.success('Review submitted successfully!');
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to submit review');
+    }
   });
 
   console.log('Product Detail - ID:', id);
@@ -108,7 +134,19 @@ const ProductDetail = () => {
     ));
   };
 
-  return (
+  const handleSubmitReview = (e) => {
+    e.preventDefault();
+    if (!user) {
+      toast.error('Please login to submit a review');
+      navigate('/login');
+      return;
+    }
+    if (!newReview.comment.trim()) {
+      toast.error('Please write a comment');
+      return;
+    }
+    createReviewMutation.mutate(newReview);
+  }; return (
     <div className="min-h-screen bg-cream-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
@@ -304,6 +342,118 @@ const ProductDetail = () => {
                 <span>{product.stock === 0 ? 'Out of Stock' : `Add ${quantity} to Cart`}</span>
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* Reviews Section */}
+        <div className="mt-12 space-y-6">
+          <h2 className="text-3xl font-bold text-gray-900">Customer Reviews</h2>
+
+          {/* Write a Review */}
+          {user && (
+            <div className="bg-white rounded-3xl p-6 border border-primary-100 shadow-soft">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Write a Review</h3>
+              <form onSubmit={handleSubmitReview} className="space-y-4">
+                {/* Star Rating */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">
+                    Your Rating
+                  </label>
+                  <div className="flex items-center space-x-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setNewReview({ ...newReview, rating: star })}
+                        className="focus:outline-none transition-transform hover:scale-110"
+                      >
+                        <Star
+                          size={32}
+                          className={star <= newReview.rating
+                            ? 'text-yellow-500 fill-yellow-500'
+                            : 'text-gray-300'
+                          }
+                        />
+                      </button>
+                    ))}
+                    <span className="ml-2 text-lg font-semibold text-gray-900">
+                      {newReview.rating} / 5
+                    </span>
+                  </div>
+                </div>
+
+                {/* Comment */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">
+                    Your Review
+                  </label>
+                  <textarea
+                    value={newReview.comment}
+                    onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+                    placeholder="Share your thoughts about this product..."
+                    rows={4}
+                    className="w-full px-4 py-3 border border-primary-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
+                    maxLength={500}
+                  />
+                  <p className="text-sm text-gray-500 mt-1">
+                    {newReview.comment.length} / 500 characters
+                  </p>
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={createReviewMutation.isPending}
+                  className="bg-primary-800 text-white px-6 py-3 rounded-2xl font-semibold hover:bg-primary-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center space-x-2"
+                >
+                  <Send size={18} />
+                  <span>{createReviewMutation.isPending ? 'Submitting...' : 'Submit Review'}</span>
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* Reviews List */}
+          <div className="space-y-4">
+            {reviewsLoading ? (
+              <div className="text-center py-8">
+                <Loader />
+              </div>
+            ) : reviews.length === 0 ? (
+              <div className="bg-white rounded-3xl p-8 border border-primary-100 text-center">
+                <Star className="text-primary-300 mx-auto mb-4" size={48} />
+                <p className="text-gray-600 text-lg">No reviews yet. Be the first to review this product!</p>
+              </div>
+            ) : (
+              reviews.map((review) => (
+                <div
+                  key={review._id}
+                  className="bg-white rounded-3xl p-6 border border-primary-100 shadow-soft"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h4 className="font-bold text-gray-900">{review.user?.name || 'Anonymous'}</h4>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <div className="flex items-center space-x-1">
+                          {renderStars(review.rating)}
+                        </div>
+                        <span className="text-sm font-semibold text-gray-900">
+                          {review.rating}.0
+                        </span>
+                      </div>
+                    </div>
+                    <span className="text-sm text-gray-500">
+                      {new Date(review.createdAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </span>
+                  </div>
+                  <p className="text-gray-700 leading-relaxed">{review.comment}</p>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
