@@ -107,7 +107,7 @@ const Header = () => {
             )}
           </nav>
 
-          \          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3">
 
             <Link
               to="/cart"
