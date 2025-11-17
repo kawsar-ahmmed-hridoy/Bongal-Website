@@ -61,3 +61,42 @@ export const admin = (req: any, res: Response, next: NextFunction) => {
     });
   }
 };
+
+export const optionalAuth = async (
+  req: any,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    let token;
+
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith('Bearer')
+    ) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+
+    if (token) {
+      try {
+        const decoded = jwt.verify(
+          token,
+          process.env.JWT_SECRET as string
+        ) as JwtPayload;
+
+        req.user = await User.findById(decoded._id).select('-password -verificationCode -verificationCodeExpires');
+
+        if (req.user) {
+          req.user.id = req.user._id;
+        }
+      } catch (error) {
+        // Token is invalid, but continue anyway (guest checkout)
+        req.user = null;
+      }
+    }
+
+    next();
+  } catch (error) {
+    next();
+  }
+};

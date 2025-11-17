@@ -6,11 +6,11 @@ import {
   getAllOrders,
   updateOrderStatus,
 } from '../controllers/orderController';
-import { protect, admin } from '../middleware/auth';
+import { protect, admin, optionalAuth } from '../middleware/auth';
 
 const router = express.Router();
 
-router.post('/', protect, createOrder);
+router.post('/', optionalAuth, createOrder);
 router.get('/my-orders', protect, getMyOrders);
 router.get('/:id', protect, getOrderById);
 router.get('/', protect, admin, getAllOrders);

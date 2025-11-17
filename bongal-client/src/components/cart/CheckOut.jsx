@@ -102,13 +102,14 @@ const CheckOut = () => {
 
     const orderData = {
       items: cart.map(item => ({
-        product: item.id,
+        product: item._id || item.id,
         quantity: item.quantity,
         price: item.price
       })),
       shippingAddress: {
         fullName: formData.fullName,
         phone: formData.phone,
+        email: formData.email,
         address: formData.address,
         city: formData.city,
         postalCode: formData.postalCode

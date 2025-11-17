@@ -6,11 +6,11 @@ import { Shield, Truck, Lock, ArrowRight, Package } from 'lucide-react';
 const OrderSummary = ({ onCheckout }) => {
   const { cartTotal, cartCount } = useCart();
   const { user } = useAuth();
-  
+
   const deliveryFee = cartTotal >= 500 ? 0 : 60;
   const tax = Math.round(cartTotal * 0.05);
   const total = cartTotal + deliveryFee + tax;
-  
+
   const originalTotal = cartTotal + (cartTotal >= 500 ? 0 : 60);
   const savings = originalTotal - total;
 
@@ -31,7 +31,7 @@ const OrderSummary = ({ onCheckout }) => {
           <span className="text-gray-700 font-medium">Subtotal</span>
           <span className="text-gray-900 font-semibold">{formatPrice(cartTotal)}</span>
         </div>
-        
+
         <div className="flex justify-between items-center">
           <span className="text-gray-700 font-medium">Delivery</span>
           <div className="text-right">
@@ -50,7 +50,7 @@ const OrderSummary = ({ onCheckout }) => {
             )}
           </div>
         </div>
-        
+
         <div className="flex justify-between items-center">
           <span className="text-gray-700 font-medium">VAT (5%)</span>
           <span className="text-gray-900 font-semibold">{formatPrice(tax)}</span>
@@ -79,7 +79,7 @@ const OrderSummary = ({ onCheckout }) => {
         disabled={cartCount === 0}
         className="w-full bg-gray-900 text-white py-4 rounded-2xl font-semibold hover:bg-gray-800 transition-all duration-300 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center space-x-3 group"
       >
-        <span>{user ? 'Proceed to Checkout' : 'Sign in to Checkout'}</span>
+        <span>{'Proceed to Checkout'}</span>
         <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-300" />
       </button>
 
