@@ -7,13 +7,21 @@ interface IOrderItem {
 }
 
 export interface IOrder extends Document {
-  user: mongoose.Types.ObjectId;
+  user?: mongoose.Types.ObjectId;
   items: IOrderItem[];
-  shippingAddress: string;
+  shippingAddress: {
+    fullName: string;
+    phone: string;
+    email?: string;
+    address: string;
+    city: string;
+    postalCode?: string;
+  };
   paymentMethod: string;
   paymentStatus: 'pending' | 'paid' | 'failed';
   orderStatus: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   totalAmount: number;
+  notes?: string;
   transactionId?: string;
   deliveredAt?: Date;
   createdAt: Date;
@@ -25,7 +33,7 @@ const orderSchema = new Schema<IOrder>(
     user: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
+      required: false,
     },
     items: [
       {
@@ -46,13 +54,33 @@ const orderSchema = new Schema<IOrder>(
       },
     ],
     shippingAddress: {
-      type: String,
-      required: [true, 'Please provide shipping address'],
+      fullName: {
+        type: String,
+        required: [true, 'Please provide full name'],
+      },
+      phone: {
+        type: String,
+        required: [true, 'Please provide phone number'],
+      },
+      email: {
+        type: String,
+      },
+      address: {
+        type: String,
+        required: [true, 'Please provide address'],
+      },
+      city: {
+        type: String,
+        required: [true, 'Please provide city'],
+      },
+      postalCode: {
+        type: String,
+      },
     },
     paymentMethod: {
       type: String,
       required: [true, 'Please provide payment method'],
-      enum: ['bKash', 'Nagad', 'Rocket', 'COD', 'Card'],
+      enum: ['bKash', 'Nagad', 'Rocket', 'COD', 'Card', 'cod', 'bkash', 'nagad'],
     },
     paymentStatus: {
       type: String,
@@ -67,6 +95,9 @@ const orderSchema = new Schema<IOrder>(
     totalAmount: {
       type: Number,
       required: true,
+    },
+    notes: {
+      type: String,
     },
     transactionId: {
       type: String,

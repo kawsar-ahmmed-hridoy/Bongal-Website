@@ -3,11 +3,12 @@ import { Routes, Route, Link, useLocation, useNavigate, Outlet } from 'react-rou
 import { useQuery } from "@tanstack/react-query";
 import { productService } from '../../services/productService';
 import { orderService } from '../../services/orderService';
-import { Package, ShoppingBag, BarChart3, Home, LogOut, Menu, X, Users, DollarSign, TrendingUp, AlertTriangle, ArrowRight, Settings, Shield } from 'lucide-react';
+import { Package, ShoppingBag, BarChart3, Home, LogOut, Menu, X, Users, DollarSign, TrendingUp, AlertTriangle, ArrowRight, Settings, Shield, Upload } from 'lucide-react';
 import { formatPrice, formatDate } from '../../utils/helpers';
 import ProductManagement from './ProductManagement';
 import OrderManagement from './OrderManagement';
 import Analytics from './Analytics';
+import ImageUpload from './ImageUpload';
 
 const AdminDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -20,7 +21,7 @@ const AdminDashboard = () => {
     retry: 1,
     refetchOnWindowFocus: false
   });
-  
+
   const { data: orders, isLoading: ordersLoading } = useQuery({
     queryKey: ['dashboard-orders'],
     queryFn: orderService.getAllOrders,
@@ -33,6 +34,7 @@ const AdminDashboard = () => {
     { name: 'Products', href: '/admin/products', icon: Package },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingBag },
     { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
+    { name: 'Upload Images', href: '/admin/upload', icon: Upload },
   ];
 
   const handleLogout = () => {
@@ -55,17 +57,17 @@ const AdminDashboard = () => {
       const amount = isCompleted ? (order?.totalAmount || order?.total || 0) : 0;
       return sum + (typeof amount === 'number' ? amount : 0);
     }, 0) : 0;
-    const pendingOrders = hasOrders ? ordersList.filter((o) => 
+    const pendingOrders = hasOrders ? ordersList.filter((o) =>
       (o?.orderStatus || o?.status) === 'pending'
     ).length : 0;
-    const lowStockProducts = hasProducts ? 
+    const lowStockProducts = hasProducts ?
       productsList.filter((p) => (p?.stock || 0) < 10).length : 0;
-    const outOfStockProducts = hasProducts ? 
+    const outOfStockProducts = hasProducts ?
       productsList.filter((p) => (p?.stock || 0) === 0).length : 0;
     const recentOrders = hasOrders ? ordersList
       .sort((a, b) => new Date(b?.createdAt || b?.date) - new Date(a?.createdAt || a?.date))
       .slice(0, 5) : [];
-    const criticalStockAlerts = hasProducts ? 
+    const criticalStockAlerts = hasProducts ?
       productsList.filter((p) => (p?.stock || 0) < 5).slice(0, 5) : [];
 
     const statCards = [
@@ -114,7 +116,7 @@ const AdminDashboard = () => {
     const getStatusBadge = (status) => {
       const baseClasses = "text-xs px-3 py-1.5 rounded-full font-semibold";
       const statusValue = status || 'pending';
-      
+
       switch (statusValue) {
         case 'pending': return `${baseClasses} bg-yellow-100 text-yellow-800`;
         case 'processing': return `${baseClasses} bg-blue-100 text-blue-800`;
@@ -241,9 +243,8 @@ const AdminDashboard = () => {
                         <p className="text-xs text-gray-500 capitalize">{product?.category || 'uncategorized'}</p>
                       </div>
                     </div>
-                    <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
-                      (product?.stock || 0) === 0 ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
-                    }`}>
+                    <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${(product?.stock || 0) === 0 ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
+                      }`}>
                       {(product?.stock || 0) === 0 ? 'Out of Stock' : `${product?.stock || 0} left`}
                     </span>
                   </div>
@@ -272,9 +273,9 @@ const AdminDashboard = () => {
             {navigation.filter(item => item.name !== 'Dashboard').map((item) => {
               const Icon = item.icon;
               return (
-                <Link 
-                  key={item.name} 
-                  to={item.href} 
+                <Link
+                  key={item.name}
+                  to={item.href}
                   className="bg-gray-50 border border-gray-200 rounded-2xl p-5 hover:bg-gray-100 transition-all duration-300 group"
                 >
                   <div className="flex items-center space-x-4">
@@ -306,9 +307,8 @@ const AdminDashboard = () => {
         </button>
       </div>
 
-      <div className={`fixed inset-y-0 left-0 w-80 bg-white shadow-lg border-r border-gray-200/60 transform transition-transform lg:translate-x-0 z-40 ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
+      <div className={`fixed inset-y-0 left-0 w-80 bg-white shadow-lg border-r border-gray-200/60 transform transition-transform lg:translate-x-0 z-40 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}>
         <div className="flex flex-col h-full mt-11">
           <div className="flex items-center space-x-3 p-6 border-b border-gray-200/60">
             <div className="w-12 h-12 bg-gray-900 rounded-2xl flex items-center justify-center">
@@ -319,22 +319,21 @@ const AdminDashboard = () => {
               <p className="text-gray-600 text-sm">বঙ্গাল Management</p>
             </div>
           </div>
-          
+
           <nav className="flex-1 px-4 py-6 space-y-2">
             {navigation.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.href;
-              
+
               return (
                 <Link
                   key={item.name}
                   to={item.href}
                   onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center space-x-3 px-4 py-4 rounded-2xl transition-all duration-300 ${
-                    isActive
+                  className={`flex items-center space-x-3 px-4 py-4 rounded-2xl transition-all duration-300 ${isActive
                       ? 'bg-gray-900 text-white shadow-sm'
                       : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                  }`}
+                    }`}
                 >
                   <Icon size={20} />
                   <span className="font-medium">{item.name}</span>
@@ -362,12 +361,13 @@ const AdminDashboard = () => {
             <Route path="products" element={<ProductManagement />} />
             <Route path="orders" element={<OrderManagement />} />
             <Route path="analytics" element={<Analytics />} />
+            <Route path="upload" element={<ImageUpload />} />
           </Routes>
         </div>
       </div>
 
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
