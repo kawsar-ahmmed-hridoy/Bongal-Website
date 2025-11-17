@@ -44,6 +44,7 @@ const CheckOut = () => {
   const createOrderMutation = useMutation({
     mutationFn: orderService.createOrder,
     onSuccess: (data) => {
+      console.log(data);
       clearCart();
       toast.success('Order placed successfully!');
       navigate(`/orders`);

@@ -33,8 +33,7 @@ export class EmailService {
   async sendVerificationEmail(email: string, verificationCode: string) {
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #16a34a;">Verify Your Email</h1>
-        <p>Thank you for registering with বঙ্গাল! Use the verification code below to activate your account:</p>
+        <h1>Use the verification code below to access your বঙ্গাল account. Thank you! </h1>
         <h2 style="color: #16a34a; font-size: 32px; margin: 20px 0;">${verificationCode}</h2>
         <p style="margin-top: 30px; color: #666;">This code will expire in 15 minutes.</p>
         <p>If you did not sign up, please ignore this email.</p>
