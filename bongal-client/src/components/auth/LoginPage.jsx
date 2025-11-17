@@ -9,7 +9,7 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   const { login } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -24,7 +24,9 @@ const LoginPage = () => {
       await login({ email, password });
       navigate(redirect);
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid email or password');
+      console.error('Login error:', err);
+      const errorMessage = err.response?.data?.message || err.message || 'Invalid email or password. Please try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -99,14 +101,14 @@ const LoginPage = () => {
 
             <div className="flex items-center justify-between">
               <label className="flex items-center space-x-2">
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   className="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900"
                 />
                 <span className="text-sm text-gray-600 font-medium">Remember me</span>
               </label>
-              <Link 
-                to="/forgot-password" 
+              <Link
+                to="/forgot-password"
                 className="text-sm text-gray-600 hover:text-gray-900 font-medium transition-colors duration-300"
               >
                 Forgot Password?
@@ -133,8 +135,8 @@ const LoginPage = () => {
           </div>
 
           <div className="text-center">
-            <Link 
-              to="/register" 
+            <Link
+              to="/register"
               className="inline-flex items-center space-x-2 text-gray-900 font-semibold hover:text-gray-700 transition-colors duration-300 group"
             >
               <span>Create an account</span>
