@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
-const CommentsSection = ({ postId }) => {
+const CommentsSection = ({ postId, onCommentAdded, onCommentDeleted }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -15,7 +15,9 @@ const CommentsSection = ({ postId }) => {
   // Fetch comments
   const { data: commentsData, isLoading } = useQuery({
     queryKey: ['comments', postId],
-    queryFn: () => commentService.getComments(postId)
+    queryFn: () => commentService.getComments(postId),
+    staleTime: 0, // Comments can go stale immediately
+    refetchOnWindowFocus: false // Don't refetch when window gains focus
   });
 
   // Create comment mutation
@@ -24,7 +26,10 @@ const CommentsSection = ({ postId }) => {
     onSuccess: () => {
       setNewComment('');
       queryClient.invalidateQueries(['comments', postId]);
-      queryClient.invalidateQueries(['posts']);
+      // Call callback to update parent's comment count
+      if (onCommentAdded) {
+        onCommentAdded();
+      }
       toast.success('Comment added');
     },
     onError: (error) => {
@@ -37,7 +42,10 @@ const CommentsSection = ({ postId }) => {
     mutationFn: (commentId) => commentService.deleteComment(commentId),
     onSuccess: () => {
       queryClient.invalidateQueries(['comments', postId]);
-      queryClient.invalidateQueries(['posts']);
+      // Call callback to update parent's comment count
+      if (onCommentDeleted) {
+        onCommentDeleted();
+      }
       toast.success('Comment deleted');
     },
     onError: (error) => {

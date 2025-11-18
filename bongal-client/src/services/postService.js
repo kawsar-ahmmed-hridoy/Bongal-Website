@@ -76,5 +76,23 @@ export const postService = {
   updatePostStatus: async (postId, status) => {
     const response = await api.patch(`/posts/admin/${postId}/status`, { status });
     return response.data;
+  },
+
+  // Get post categories
+  getPostCategories: async () => {
+    const response = await api.get('/posts/categories');
+    return response.data;
+  },
+
+  // Admin: Create post category
+  createPostCategory: async (name) => {
+    const response = await api.post('/posts/admin/categories', { name });
+    return response.data;
+  },
+
+  // Admin: Delete post category
+  deletePostCategory: async (categoryId) => {
+    const response = await api.delete(`/posts/admin/categories/${categoryId}`);
+    return response.data;
   }
 };

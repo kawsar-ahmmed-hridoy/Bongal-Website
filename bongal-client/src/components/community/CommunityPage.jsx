@@ -1,41 +1,44 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { postService } from '../../services/postService';
-import { productService } from '../../services/productService';
 import PostCard from './PostCard';
 import CreatePostWidget from './CreatePostWidget';
-import PostFilters from './PostFilters';
 import Loader from '../common/Loader';
 
 const CommunityPage = () => {
   const [filters, setFilters] = useState({
-    category: 'all',
-    sortBy: 'popular',
+    category: 'general',
     page: 1
   });
 
   // Fetch posts
   const { data: postsData, isLoading: postsLoading, error: postsError } = useQuery({
     queryKey: ['posts', filters],
-    queryFn: () => postService.getPosts(filters)
+    queryFn: () => postService.getPosts(filters),
+    staleTime: Infinity, // Keep data fresh indefinitely
+    gcTime: Infinity, // Never garbage collect cached data
+    refetchOnWindowFocus: false, // Don't refetch when window gains focus
+    refetchOnMount: false, // Don't refetch when component mounts if data exists
+    refetchOnReconnect: false, // Don't refetch when reconnecting
+    refetchInterval: false, // Disable automatic refetch intervals
+    refetchIntervalInBackground: false // Disable background refetch
   });
 
-  // Fetch products for categories
-  const { data: productsData } = useQuery({
-    queryKey: ['products-categories'],
-    queryFn: () => productService.getAllProducts({ limit: 100 })
+  // Fetch post categories
+  const { data: categoriesData } = useQuery({
+    queryKey: ['post-categories'],
+    queryFn: () => postService.getPostCategories()
   });
 
   const posts = Array.isArray(postsData?.data) ? postsData.data : [];
-  const products = Array.isArray(productsData?.products) ? productsData.products : Array.isArray(productsData?.data) ? productsData.data : [];
+  const postCategories = categoriesData?.data || [];
 
-  // Extract unique categories from products
+  // Build categories list - start with General, then add custom categories
   const categories = [
-    { value: 'all', label: 'All Posts' },
     { value: 'general', label: 'General' },
-    ...products.map(product => ({
-      value: product.name,
-      label: product.name
+    ...postCategories.map(category => ({
+      value: category.name,
+      label: category.name
     }))
   ];
 
@@ -83,14 +86,26 @@ const CommunityPage = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Sidebar - Filters */}
+          {/* Sidebar - Category Filter */}
           <div className="lg:col-span-3">
             <div className="sticky top-24">
-              <PostFilters
-                categories={categories}
-                currentFilters={filters}
-                onFilterChange={handleFilterChange}
-              />
+              <div className="bg-white rounded-3xl shadow-lg border-2 border-gray-100 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Categories</h3>
+                <div className="space-y-2">
+                  {categories.map((category) => (
+                    <button
+                      key={category.value}
+                      onClick={() => handleFilterChange({ category: category.value })}
+                      className={`w-full text-left px-4 py-2.5 rounded-xl transition-all ${filters.category === category.value
+                        ? 'bg-primary-600 text-white shadow-md'
+                        : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                        }`}
+                    >
+                      {category.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 

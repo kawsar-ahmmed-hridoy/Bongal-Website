@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Heart, MessageCircle, Share2, Trash2 } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Trash2, X } from 'lucide-react';
 import { postService } from '../../services/postService';
 import { useAuth } from '../../context/AuthContext';
 import CommentsSection from './CommentsSection';
@@ -12,23 +12,41 @@ const PostCard = ({ post }) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [showComments, setShowComments] = useState(false);
-  const [isLiked, setIsLiked] = useState(
-    user ? post.likes?.includes(user._id) : false
-  );
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  // Use isLiked flag from backend response (backend checks if user's ID is in likes array)
+  const [isLiked, setIsLiked] = useState(post.isLiked || false);
+  const [likesCount, setLikesCount] = useState(post.likesCount || 0);
+  const [commentsCount, setCommentsCount] = useState(post.commentsCount || 0);
 
   // Toggle like mutation
   const likeMutation = useMutation({
     mutationFn: () => postService.toggleLike(post._id),
     onMutate: async () => {
       // Optimistic update
-      setIsLiked(!isLiked);
+      const previousIsLiked = isLiked;
+      const previousCount = likesCount;
+      const newIsLiked = !previousIsLiked;
+
+      setIsLiked(newIsLiked);
+      setLikesCount(newIsLiked ? previousCount + 1 : previousCount - 1);
+
+      // Return context for rollback
+      return { previousIsLiked, previousCount };
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries(['posts']);
+    onSuccess: (data) => {
+      // Update with actual data from server
+      if (data?.data) {
+        setLikesCount(data.data.likesCount || 0);
+        setIsLiked(data.data.isLiked);
+      }
     },
-    onError: () => {
-      // Revert on error
-      setIsLiked(!isLiked);
+    onError: (error, variables, context) => {
+      // Revert to previous state on error
+      if (context) {
+        setIsLiked(context.previousIsLiked);
+        setLikesCount(context.previousCount);
+      }
       toast.error('Failed to update like');
     }
   });
@@ -38,7 +56,7 @@ const PostCard = ({ post }) => {
     mutationFn: () => postService.sharePost(post._id),
     onSuccess: () => {
       toast.success('Post shared!');
-      queryClient.invalidateQueries(['posts']);
+      // Don't refetch posts to avoid shuffling
     }
   });
 
@@ -145,18 +163,40 @@ const PostCard = ({ post }) => {
               key={index}
               src={image}
               alt={`Post image ${index + 1}`}
-              className="w-full h-64 object-cover rounded-xl"
+              className="w-full max-h-[500px] object-contain rounded-xl bg-gray-50 cursor-pointer hover:opacity-95 transition-opacity"
+              onClick={() => setSelectedImage(image)}
             />
           ))}
+        </div>
+      )}
+
+      {/* Image Lightbox Modal */}
+      {selectedImage && (
+        <div
+          className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center p-4"
+          onClick={() => setSelectedImage(null)}
+        >
+          <button
+            onClick={() => setSelectedImage(null)}
+            className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors"
+          >
+            <X size={32} />
+          </button>
+          <img
+            src={selectedImage}
+            alt="Full size"
+            className="max-w-full max-h-full object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
         </div>
       )}
 
       {/* Stats */}
       <div className="px-6 py-3 border-t border-gray-100">
         <div className="flex items-center justify-between text-sm text-gray-500">
-          <span>{post.likesCount || 0} likes</span>
+          <span>{likesCount} likes</span>
           <div className="flex items-center space-x-4">
-            <span>{post.commentsCount || 0} comments</span>
+            <span>{commentsCount} comments</span>
             <span>{post.sharesCount || 0} shares</span>
           </div>
         </div>
@@ -169,8 +209,8 @@ const PostCard = ({ post }) => {
             onClick={handleLike}
             disabled={likeMutation.isPending}
             className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${isLiked
-                ? 'text-red-600 bg-red-50 hover:bg-red-100'
-                : 'text-gray-600 hover:bg-gray-100'
+              ? 'text-red-600 bg-red-50 hover:bg-red-100'
+              : 'text-gray-600 hover:bg-gray-100'
               }`}
           >
             <Heart size={20} fill={isLiked ? 'currentColor' : 'none'} />
@@ -198,7 +238,11 @@ const PostCard = ({ post }) => {
 
       {/* Comments Section */}
       {showComments && (
-        <CommentsSection postId={post._id} />
+        <CommentsSection
+          postId={post._id}
+          onCommentAdded={() => setCommentsCount(prev => prev + 1)}
+          onCommentDeleted={() => setCommentsCount(prev => Math.max(0, prev - 1))}
+        />
       )}
     </div>
   );
