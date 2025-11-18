@@ -1,5 +1,5 @@
 import express from 'express';
-import { protect, requireAdmin } from '../middleware/auth';
+import { protect, requireAdmin, optionalAuth } from '../middleware/auth';
 import {
   createPost,
   getPosts,
@@ -14,9 +14,9 @@ import {
 
 const router = express.Router();
 
-// Public routes
-router.get('/', getPosts);
-router.get('/:id', getPostById);
+// Public routes with optional auth (to check if user liked posts)
+router.get('/', optionalAuth, getPosts);
+router.get('/:id', optionalAuth, getPostById);
 
 // Protected routes (require authentication)
 router.use(protect);

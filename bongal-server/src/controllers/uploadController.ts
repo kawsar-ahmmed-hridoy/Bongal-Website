@@ -51,6 +51,47 @@ export const uploadImage = async (req: any, res: Response) => {
   }
 };
 
+// Community post image upload with aspect ratio preservation and WebP format
+export const uploadCommunityImage = async (req: any, res: Response) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No file uploaded',
+      });
+    }
+
+    // Upload to Cloudinary with optimized transformations for community posts
+    // Portrait: 1080x1920, Landscape: 1200x630
+    const result = await uploadFromBuffer(req.file.buffer, {
+      folder: 'bongal/community',
+      transformation: [
+        {
+          width: 1200,
+          height: 1920,
+          crop: 'limit' // Automatically fits within bounds while preserving aspect ratio
+        },
+        { quality: 'auto:good' },
+        { format: 'webp' }, // Force WebP format for fast loading
+      ],
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Image uploaded successfully',
+      data: {
+        url: result.secure_url,
+        public_id: result.public_id,
+      },
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Image upload failed',
+    });
+  }
+};
+
 export const uploadMultipleImages = async (req: any, res: Response) => {
   try {
     if (!req.files || req.files.length === 0) {

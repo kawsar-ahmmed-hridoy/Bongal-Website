@@ -51,52 +51,39 @@ export const createPost = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Get all approved posts with pagination and sorting
+// Get all approved posts with pagination
 export const getPosts = async (req: AuthRequest, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const category = req.query.category as string;
-    const sortBy = (req.query.sortBy as string) || 'popular'; // popular, newest, trending
     const skip = (page - 1) * limit;
+    const userId = req.user?._id; // Get current user ID if logged in
 
     const query: any = { status: 'approved' };
     if (category && category !== 'all') {
       query.category = category;
     }
 
-    let sortOptions: any = {};
-    switch (sortBy) {
-      case 'newest':
-        sortOptions = { createdAt: -1 };
-        break;
-      case 'trending':
-        // Trending: High engagement in recent time
-        sortOptions = { likesCount: -1, commentsCount: -1, createdAt: -1 };
-        break;
-      case 'popular':
-      default:
-        // Popular: Combination of likes, comments, and shares
-        sortOptions = {
-          likesCount: -1,
-          commentsCount: -1,
-          sharesCount: -1
-        };
-        break;
-    }
-
+    // Fetch posts sorted by creation date (newest first) for consistent ordering
     const posts = await Post.find(query)
       .populate('author', 'name email')
-      .sort(sortOptions)
+      .sort({ createdAt: -1 }) // Newest first - consistent ordering
       .skip(skip)
       .limit(limit)
       .lean();
+
+    // Add isLiked flag for current user
+    const postsWithLikeStatus = posts.map(post => ({
+      ...post,
+      isLiked: userId ? post.likes.some((likeId: any) => likeId.toString() === userId.toString()) : false
+    }));
 
     const total = await Post.countDocuments(query);
 
     res.json({
       success: true,
-      data: posts,
+      data: postsWithLikeStatus,
       pagination: {
         page,
         limit,
