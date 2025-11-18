@@ -2,6 +2,7 @@ import { Response } from 'express';
 import Post from '../models/Post';
 import Comment from '../models/Comment';
 import Notification from '../models/Notification';
+import PostCategory from '../models/PostCategory';
 import { AuthRequest } from '../middleware/auth';
 
 // Create a new post
@@ -335,6 +336,99 @@ export const updatePostStatus = async (req: AuthRequest, res: Response) => {
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to update post status'
+    });
+  }
+};
+
+// Get all post categories
+export const getPostCategories = async (req: AuthRequest, res: Response) => {
+  try {
+    const categories = await PostCategory.find().sort({ name: 1 });
+
+    // If no categories exist, create default ones
+    if (categories.length === 0) {
+      const defaultCategories = ['Electronics', 'Fashion', 'Home & Garden', 'Sports', 'Books', 'Food & Dining'];
+      await PostCategory.insertMany(defaultCategories.map(name => ({ name })));
+      const newCategories = await PostCategory.find().sort({ name: 1 });
+      return res.json({
+        success: true,
+        data: newCategories
+      });
+    }
+
+    res.json({
+      success: true,
+      data: categories
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to fetch categories'
+    });
+  }
+};
+
+// Create post category (Admin only)
+export const createPostCategory = async (req: AuthRequest, res: Response) => {
+  try {
+    const { name } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Category name is required'
+      });
+    }
+
+    const existingCategory = await PostCategory.findOne({ name: name.trim() });
+    if (existingCategory) {
+      return res.status(400).json({
+        success: false,
+        message: 'Category already exists'
+      });
+    }
+
+    const category = await PostCategory.create({ name: name.trim() });
+
+    res.status(201).json({
+      success: true,
+      message: 'Category created successfully',
+      data: category
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to create category'
+    });
+  }
+};
+
+// Delete post category (Admin only)
+export const deletePostCategory = async (req: AuthRequest, res: Response) => {
+  try {
+    const category = await PostCategory.findByIdAndDelete(req.params.id);
+
+    if (!category) {
+      return res.status(404).json({
+        success: false,
+        message: 'Category not found'
+      });
+    }
+
+    // Update all posts with this category to 'general'
+    await Post.updateMany(
+      { category: category.name },
+      { category: 'general' }
+    );
+
+    res.json({
+      success: true,
+      message: 'Category deleted successfully'
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to delete category'
     });
   }
 };
