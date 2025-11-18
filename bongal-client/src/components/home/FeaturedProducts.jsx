@@ -18,7 +18,7 @@ const FeaturedProducts = () => {
   console.log('FeaturedProducts rendering - isLoading:', isLoading, 'error:', error, 'data:', data);
 
   if (isLoading) return <Loader />;
-  
+
   if (error) {
     console.error('Featured products error:', error);
     return (
@@ -60,7 +60,7 @@ const FeaturedProducts = () => {
             </div>
             <h2 className="text-4xl font-bold text-gray-900 mb-4 tracking-tight">Featured Products</h2>
             <p className="text-xl text-gray-600 bengali-text font-light mb-8">বিশেষ পণ্য</p>
-            
+
             <div className="bg-gray-50 rounded-2xl p-8 mb-8 border border-gray-200/60">
               <p className="text-gray-600 text-lg font-light mb-6">
                 No featured products available at the moment.
@@ -99,7 +99,7 @@ const FeaturedProducts = () => {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard key={product._id || product.id} product={product} />
           ))}
         </div>
 

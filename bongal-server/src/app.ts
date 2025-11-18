@@ -9,6 +9,9 @@ import paymentRoutes from './routes/paymentRoutes';
 import uploadRoutes from './routes/uploadRoutes';
 import reviewRoutes from './routes/reviewRoutes';
 import messageRoutes from './routes/messageRoutes';
+import postRoutes from './routes/postRoutes';
+import commentRoutes from './routes/commentRoutes';
+import notificationRoutes from './routes/notificationRoutes';
 import testRoutes from './routes/testRoutes';
 import { errorHandler } from './middleware/errorHandler';
 
@@ -23,6 +26,15 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Request logger for debugging
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+  if (req.method === 'POST') {
+    console.log('Body:', JSON.stringify(req.body, null, 2));
+  }
+  next();
+});
+
 app.get('/api', (req: Request, res: Response) => {
   res.json({
     message: 'বঙ্গাল API is running',
@@ -36,6 +48,9 @@ app.get('/api', (req: Request, res: Response) => {
       upload: '/api/upload',
       reviews: '/api/reviews',
       messages: '/api/messages',
+      posts: '/api/posts',
+      comments: '/api/comments',
+      notifications: '/api/notifications',
     },
   });
 });
@@ -48,6 +63,9 @@ app.use('/api/payment', paymentRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/posts', postRoutes);
+app.use('/api/comments', commentRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Test routes (only in development)
 if (process.env.NODE_ENV === 'development') {
