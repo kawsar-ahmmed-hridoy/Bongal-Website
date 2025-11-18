@@ -8,6 +8,7 @@ import userRoutes from './routes/userRoutes';
 import paymentRoutes from './routes/paymentRoutes';
 import uploadRoutes from './routes/uploadRoutes';
 import reviewRoutes from './routes/reviewRoutes';
+import messageRoutes from './routes/messageRoutes';
 import testRoutes from './routes/testRoutes';
 import { errorHandler } from './middleware/errorHandler';
 
@@ -34,6 +35,7 @@ app.get('/api', (req: Request, res: Response) => {
       payment: '/api/payment',
       upload: '/api/upload',
       reviews: '/api/reviews',
+      messages: '/api/messages',
     },
   });
 });
@@ -45,6 +47,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/messages', messageRoutes);
 
 // Test routes (only in development)
 if (process.env.NODE_ENV === 'development') {

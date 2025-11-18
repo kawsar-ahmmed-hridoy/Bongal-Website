@@ -3,12 +3,13 @@ import { Routes, Route, Link, useLocation, useNavigate, Outlet } from 'react-rou
 import { useQuery } from "@tanstack/react-query";
 import { productService } from '../../services/productService';
 import { orderService } from '../../services/orderService';
-import { Package, ShoppingBag, BarChart3, Home, LogOut, Menu, X, Users, DollarSign, TrendingUp, AlertTriangle, ArrowRight, Settings, Shield, Upload } from 'lucide-react';
+import { Package, ShoppingBag, BarChart3, Home, LogOut, Menu, X, Users, DollarSign, TrendingUp, AlertTriangle, ArrowRight, Settings, Shield, Upload, MessageCircle } from 'lucide-react';
 import { formatPrice, formatDate } from '../../utils/helpers';
 import ProductManagement from './ProductManagement';
 import OrderManagement from './OrderManagement';
 import Analytics from './Analytics';
 import ImageUpload from './ImageUpload';
+import MessageManagement from './MessageManagement';
 
 const AdminDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -33,6 +34,7 @@ const AdminDashboard = () => {
     { name: 'Dashboard', href: '/admin', icon: Home },
     { name: 'Products', href: '/admin/products', icon: Package },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingBag },
+    { name: 'Messages', href: '/admin/messages', icon: MessageCircle },
     { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
     { name: 'Upload Images', href: '/admin/upload', icon: Upload },
   ];
@@ -331,8 +333,8 @@ const AdminDashboard = () => {
                   to={item.href}
                   onClick={() => setSidebarOpen(false)}
                   className={`flex items-center space-x-3 px-4 py-4 rounded-2xl transition-all duration-300 ${isActive
-                      ? 'bg-gray-900 text-white shadow-sm'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                    ? 'bg-gray-900 text-white shadow-sm'
+                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                     }`}
                 >
                   <Icon size={20} />
@@ -360,6 +362,7 @@ const AdminDashboard = () => {
             <Route index element={<DashboardContent />} />
             <Route path="products" element={<ProductManagement />} />
             <Route path="orders" element={<OrderManagement />} />
+            <Route path="messages" element={<MessageManagement />} />
             <Route path="analytics" element={<Analytics />} />
             <Route path="upload" element={<ImageUpload />} />
           </Routes>

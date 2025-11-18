@@ -77,11 +77,20 @@ const Header = () => {
             <Link
               to="/products"
               className={`px-5 py-2 rounded-2xl font-medium transition-all duration-300 ${isActiveLink('/products')
-                ? 'bg-primary-800 text-white shadow-soft'
-                : 'text-primary-900 hover:bg-primary-50 hover:text-primary-800'
+                  ? 'bg-primary-800 text-white shadow-soft'
+                  : 'text-primary-900 hover:bg-primary-50 hover:text-primary-800'
                 }`}
             >
               Products
+            </Link>
+            <Link
+              to="/contact"
+              className={`px-5 py-2 rounded-2xl font-medium transition-all duration-300 ${isActiveLink('/contact')
+                  ? 'bg-primary-800 text-white shadow-soft'
+                  : 'text-primary-900 hover:bg-primary-50 hover:text-primary-800'
+                }`}
+            >
+              Contact
             </Link>
             {user && (
               <Link
@@ -232,6 +241,16 @@ const Header = () => {
               onClick={() => setShowMobileMenu(false)}
             >
               Products
+            </Link>
+            <Link
+              to="/contact"
+              className={`block py-3 px-4 rounded-2xl font-medium transition-all duration-300 ${isActiveLink('/contact')
+                ? 'bg-primary-800 text-white shadow-soft'
+                : 'text-primary-900 hover:bg-primary-50'
+                }`}
+              onClick={() => setShowMobileMenu(false)}
+            >
+              Contact
             </Link>
             {user && (
               <Link

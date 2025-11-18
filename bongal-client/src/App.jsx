@@ -17,6 +17,7 @@ import NotFound from './components/common/NotFound';
 import VerifyCodePage from './components/auth/VerifyCodePage';
 import ProfilePage from './components/auth/ProfilePage';
 import ForgotPassword from './components/auth/ForgotPassword';
+import ContactPage from './components/common/ContactPage';
 
 function App() {
   return (
@@ -63,8 +64,9 @@ function App() {
             <Route path="login" element={<LoginPage />} />
             <Route path="products/:id" element={<ProductDetail />} />
             <Route path="products" element={<ProductsPage />} />
+            <Route path="contact" element={<ContactPage />} />
             <Route path="forgot-password" element={<ForgotPassword />} />
-            
+
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
