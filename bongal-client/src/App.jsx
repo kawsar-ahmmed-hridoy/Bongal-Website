@@ -17,7 +17,6 @@ import NotFound from './components/common/NotFound';
 import VerifyCodePage from './components/auth/VerifyCodePage';
 import ProfilePage from './components/auth/ProfilePage';
 import ForgotPassword from './components/auth/ForgotPassword';
-import ContactPage from './components/common/ContactPage';
 import CommunityPage from './components/community/CommunityPage';
 import PostDetailPage from './components/community/PostDetailPage';
 
@@ -68,7 +67,6 @@ function App() {
             <Route path="products" element={<ProductsPage />} />
             <Route path="community" element={<CommunityPage />} />
             <Route path="community/post/:id" element={<PostDetailPage />} />
-            <Route path="contact" element={<ContactPage />} />
             <Route path="forgot-password" element={<ForgotPassword />} />
 
             <Route path="*" element={<NotFound />} />
