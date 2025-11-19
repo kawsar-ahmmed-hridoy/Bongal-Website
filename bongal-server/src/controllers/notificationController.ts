@@ -2,7 +2,6 @@ import { Response } from 'express';
 import Notification from '../models/Notification';
 import { AuthRequest } from '../middleware/auth';
 
-// Get user's notifications
 export const getNotifications = async (req: AuthRequest, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
@@ -43,7 +42,6 @@ export const getNotifications = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Mark notification as read
 export const markAsRead = async (req: AuthRequest, res: Response) => {
   try {
     const notification = await Notification.findOneAndUpdate(
@@ -74,7 +72,6 @@ export const markAsRead = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Mark all notifications as read
 export const markAllAsRead = async (req: AuthRequest, res: Response) => {
   try {
     await Notification.updateMany(
@@ -94,7 +91,6 @@ export const markAllAsRead = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Get unread notification count
 export const getUnreadCount = async (req: AuthRequest, res: Response) => {
   try {
     const count = await Notification.countDocuments({
@@ -114,7 +110,6 @@ export const getUnreadCount = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Delete notification
 export const deleteNotification = async (req: AuthRequest, res: Response) => {
   try {
     const notification = await Notification.findOneAndDelete({

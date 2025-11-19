@@ -8,10 +8,8 @@ import {
 
 const router = express.Router();
 
-// Public route to get comments
 router.get('/:postId', getComments);
 
-// Protected routes
 router.use(protect);
 router.post('/:postId', createComment);
 router.delete('/:id', deleteComment);

@@ -66,7 +66,6 @@ export const admin = (req: any, res: Response, next: NextFunction) => {
   }
 };
 
-// Alias for admin middleware
 export const requireAdmin = admin;
 
 export const optionalAuth = async (
@@ -97,7 +96,6 @@ export const optionalAuth = async (
           req.user.id = req.user._id;
         }
       } catch (error) {
-        // Token is invalid, but continue anyway (guest checkout)
         req.user = null;
       }
     }

@@ -117,7 +117,6 @@ const MessageManagement = () => {
   if (!selectedConversation) {
     return (
       <div className="space-y-6">
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-white p-4 rounded-2xl shadow-soft border border-gray-100">
             <div className="flex items-center space-x-3">
@@ -168,7 +167,6 @@ const MessageManagement = () => {
           </div>
         </div>
 
-        {/* Filters and Search */}
         <div className="bg-white p-6 rounded-2xl shadow-soft">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
             <div className="flex items-center space-x-4">
@@ -199,7 +197,6 @@ const MessageManagement = () => {
           </div>
         </div>
 
-        {/* Conversations List */}
         <div className="bg-white rounded-2xl shadow-soft overflow-hidden">
           {filteredConversations.length === 0 ? (
             <div className="p-8 text-center">
@@ -256,7 +253,6 @@ const MessageManagement = () => {
   // Conversation Thread View
   return (
     <div className="space-y-6">
-      {/* Conversation Header */}
       <div className="bg-white p-6 rounded-2xl shadow-soft">
         <div className="flex items-center space-x-4">
           <button
@@ -278,7 +274,6 @@ const MessageManagement = () => {
         </div>
       </div>
 
-      {/* Conversation Thread */}
       <div className="bg-white rounded-2xl shadow-soft overflow-hidden">
         {isLoadingConversation ? (
           <div className="flex items-center justify-center py-12">
@@ -286,7 +281,6 @@ const MessageManagement = () => {
           </div>
         ) : (
           <div className="flex flex-col h-[600px]">
-            {/* Messages Area */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
               {conversationMessages.length === 0 ? (
                 <div className="flex items-center justify-center h-full text-gray-500">
@@ -300,7 +294,6 @@ const MessageManagement = () => {
 
                   return (
                     <div key={msg._id}>
-                      {/* Date Separator */}
                       {showDate && (
                         <div className="flex items-center justify-center my-4">
                           <div className="bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full">
@@ -313,7 +306,6 @@ const MessageManagement = () => {
                         </div>
                       )}
 
-                      {/* User Message */}
                       {!msg.isFromAdmin && (
                         <div className="flex justify-start mb-2">
                           <div className="max-w-[70%]">
@@ -335,7 +327,6 @@ const MessageManagement = () => {
                         </div>
                       )}
 
-                      {/* Admin Message */}
                       {msg.isFromAdmin && (
                         <div className="flex justify-end mt-2">
                           <div className="max-w-[70%]">
@@ -363,7 +354,6 @@ const MessageManagement = () => {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Reply Input Area */}
             <div className="border-t border-gray-200 p-4 bg-gray-50">
               <div className="flex items-end space-x-2">
                 <textarea

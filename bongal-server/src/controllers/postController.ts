@@ -5,13 +5,8 @@ import Notification from '../models/Notification';
 import PostCategory from '../models/PostCategory';
 import { AuthRequest } from '../middleware/auth';
 
-// Create a new post
 export const createPost = async (req: AuthRequest, res: Response) => {
   try {
-    console.log('createPost called');
-    console.log('Request body:', req.body);
-    console.log('User:', req.user);
-
     const { content, images, category } = req.body;
 
     if (!content || !content.trim()) {
@@ -21,7 +16,6 @@ export const createPost = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Images are already Cloudinary URLs from frontend
     const imageUrls = Array.isArray(images) ? images.slice(0, 2) : [];
 
     const post = await Post.create({
@@ -29,14 +23,12 @@ export const createPost = async (req: AuthRequest, res: Response) => {
       images: imageUrls,
       category: category || 'general',
       author: req.user._id,
-      status: 'pending' // Requires admin approval
+      status: 'pending'
     });
 
     const populatedPost = await Post.findById(post._id)
       .populate('author', 'name email')
       .lean();
-
-    console.log('Post created successfully:', populatedPost);
 
     res.status(201).json({
       success: true,
@@ -44,7 +36,6 @@ export const createPost = async (req: AuthRequest, res: Response) => {
       data: populatedPost
     });
   } catch (error: any) {
-    console.error('Error creating post:', error);
     res.status(400).json({
       success: false,
       message: error.message || 'Failed to create post'
@@ -52,29 +43,26 @@ export const createPost = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Get all approved posts with pagination
 export const getPosts = async (req: AuthRequest, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const category = req.query.category as string;
     const skip = (page - 1) * limit;
-    const userId = req.user?._id; // Get current user ID if logged in
+    const userId = req.user?._id;
 
     const query: any = { status: 'approved' };
     if (category && category !== 'all') {
       query.category = category;
     }
 
-    // Fetch posts sorted by creation date (newest first) for consistent ordering
     const posts = await Post.find(query)
       .populate('author', 'name email')
-      .sort({ createdAt: -1 }) // Newest first - consistent ordering
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
 
-    // Add isLiked flag for current user
     const postsWithLikeStatus = posts.map(post => ({
       ...post,
       isLiked: userId ? post.likes.some((likeId: any) => likeId.toString() === userId.toString()) : false
@@ -100,7 +88,6 @@ export const getPosts = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Get single post by ID
 export const getPostById = async (req: AuthRequest, res: Response) => {
   try {
     const post = await Post.findById(req.params.id)
@@ -126,7 +113,6 @@ export const getPostById = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Toggle like on a post
 export const toggleLikePost = async (req: AuthRequest, res: Response) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -142,15 +128,12 @@ export const toggleLikePost = async (req: AuthRequest, res: Response) => {
     const likeIndex = post.likes.indexOf(userId);
 
     if (likeIndex > -1) {
-      // Unlike
       post.likes.splice(likeIndex, 1);
       post.likesCount -= 1;
     } else {
-      // Like
       post.likes.push(userId);
       post.likesCount += 1;
 
-      // Send notification if likes count is multiple of 10
       if (post.likesCount % 10 === 0 && post.author.toString() !== userId.toString()) {
         await Notification.create({
           recipient: post.author,
@@ -180,7 +163,6 @@ export const toggleLikePost = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Share a post
 export const sharePost = async (req: AuthRequest, res: Response) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -209,7 +191,6 @@ export const sharePost = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Get user's own posts
 export const getMyPosts = async (req: AuthRequest, res: Response) => {
   try {
     const posts = await Post.find({ author: req.user._id })
@@ -229,7 +210,6 @@ export const getMyPosts = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Delete own post
 export const deletePost = async (req: AuthRequest, res: Response) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -241,7 +221,6 @@ export const deletePost = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Check if user is the author
     if (post.author.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
@@ -264,7 +243,6 @@ export const deletePost = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Admin: Get all posts (pending, approved, rejected)
 export const getAllPostsAdmin = async (req: AuthRequest, res: Response) => {
   try {
     const status = req.query.status as string;
@@ -291,7 +269,6 @@ export const getAllPostsAdmin = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Admin: Update post status (approve/reject)
 export const updatePostStatus = async (req: AuthRequest, res: Response) => {
   try {
     const { status } = req.body;
@@ -316,7 +293,6 @@ export const updatePostStatus = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Send notification to post author
     if (status === 'approved') {
       await Notification.create({
         recipient: post.author._id,
@@ -340,12 +316,10 @@ export const updatePostStatus = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Get all post categories
 export const getPostCategories = async (req: AuthRequest, res: Response) => {
   try {
     const categories = await PostCategory.find().sort({ name: 1 });
 
-    // If no categories exist, create default ones
     if (categories.length === 0) {
       const defaultCategories = ['Electronics', 'Fashion', 'Home & Garden', 'Sports', 'Books', 'Food & Dining'];
       await PostCategory.insertMany(defaultCategories.map(name => ({ name })));
@@ -368,7 +342,6 @@ export const getPostCategories = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Create post category (Admin only)
 export const createPostCategory = async (req: AuthRequest, res: Response) => {
   try {
     const { name } = req.body;
@@ -403,7 +376,6 @@ export const createPostCategory = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Delete post category (Admin only)
 export const deletePostCategory = async (req: AuthRequest, res: Response) => {
   try {
     const category = await PostCategory.findByIdAndDelete(req.params.id);
@@ -415,7 +387,6 @@ export const deletePostCategory = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Update all posts with this category to 'general'
     await Post.updateMany(
       { category: category.name },
       { category: 'general' }

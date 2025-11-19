@@ -116,7 +116,6 @@ const PostCard = ({ post }) => {
 
   return (
     <div className="bg-white rounded-3xl shadow-lg border-2 border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300">
-      {/* Header */}
       <div className="p-6 pb-4">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-3">
@@ -135,7 +134,6 @@ const PostCard = ({ post }) => {
             </div>
           </div>
 
-          {/* Delete button for post owner */}
           {user && user._id === post.author?._id && (
             <button
               onClick={handleDelete}
@@ -148,14 +146,12 @@ const PostCard = ({ post }) => {
         </div>
       </div>
 
-      {/* Content */}
       <div className="px-6 pb-4">
         <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">
           {post.content}
         </p>
       </div>
 
-      {/* Images */}
       {post.images && post.images.length > 0 && (
         <div className={`px-6 pb-4 grid gap-2 ${post.images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
           {post.images.map((image, index) => (
@@ -170,7 +166,6 @@ const PostCard = ({ post }) => {
         </div>
       )}
 
-      {/* Image Lightbox Modal */}
       {selectedImage && (
         <div
           className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center p-4"
@@ -191,7 +186,6 @@ const PostCard = ({ post }) => {
         </div>
       )}
 
-      {/* Stats */}
       <div className="px-6 py-3 border-t border-gray-100">
         <div className="flex items-center justify-between text-sm text-gray-500">
           <span>{likesCount} likes</span>
@@ -202,7 +196,6 @@ const PostCard = ({ post }) => {
         </div>
       </div>
 
-      {/* Actions */}
       <div className="px-6 py-3 border-t border-gray-100">
         <div className="flex items-center justify-around">
           <button
@@ -236,7 +229,6 @@ const PostCard = ({ post }) => {
         </div>
       </div>
 
-      {/* Comments Section */}
       {showComments && (
         <CommentsSection
           postId={post._id}

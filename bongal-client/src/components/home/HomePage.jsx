@@ -69,9 +69,11 @@ const HomePage = () => {
     <div className="overflow-hidden">
       <HeroSection />
 
+      <FeaturedProducts />
+
       <section className="py-24 bg-white relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-gray-50/30 to-white"></div>
-        
+
         <div className="absolute inset-0 opacity-[0.01] bg-[length:80px_80px] bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)]"></div>
 
         <div className="container mx-auto px-4 relative z-10">
@@ -80,7 +82,7 @@ const HomePage = () => {
               <Sparkles size={16} className="text-gray-500" />
               <span>Why Choose বঙ্গাল</span>
             </div>
-            
+
             <h2 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 tracking-tight">
               Experience Authenticity
             </h2>
@@ -93,12 +95,11 @@ const HomePage = () => {
             {features.map((feature, index) => (
               <div
                 key={index}
-                className={`group relative bg-white p-8 rounded-3xl border border-gray-200/60 hover:border-gray-300 transition-all duration-500 ${
-                  visibleFeatures.includes(index) 
-                    ? 'opacity-100 translate-y-0' 
+                className={`group relative bg-white p-8 rounded-3xl border border-gray-200/60 hover:border-gray-300 transition-all duration-500 ${visibleFeatures.includes(index)
+                    ? 'opacity-100 translate-y-0'
                     : 'opacity-0 translate-y-8'
-                } hover:shadow-lg hover:scale-105`}
-                style={{ 
+                  } hover:shadow-lg hover:scale-105`}
+                style={{
                   transitionDelay: `${index * 100}ms`
                 }}
               >
@@ -107,15 +108,15 @@ const HomePage = () => {
                     {feature.icon}
                   </div>
                 </div>
-                
+
                 <h3 className="text-2xl font-semibold text-gray-900 mb-3 tracking-tight">
                   {feature.title}
                 </h3>
-                
+
                 <p className="text-lg text-gray-700 font-medium mb-4 bengali-text">
                   {feature.title_bn}
                 </p>
-                
+
                 <p className="text-gray-500 leading-relaxed text-base">
                   {feature.description}
                 </p>
@@ -127,11 +128,9 @@ const HomePage = () => {
         </div>
       </section>
 
-      <FeaturedProducts />
-
       <section className="relative py-24 bg-gray-900 text-white overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.02)_0%,rgba(255,255,255,0)_100%)]"></div>
-        
+
         <div className="absolute inset-0 opacity-[0.02] bg-[length:60px_60px] bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)]"></div>
 
         <div className="container mx-auto px-4 text-center relative z-10">
@@ -142,7 +141,7 @@ const HomePage = () => {
             <p className="text-2xl text-gray-300 font-light mb-12 leading-relaxed">
               আজই কেনাকাটা শুরু করুন এবং খাঁটি গ্রামীণ পণ্যের স্বাদ নিন
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-5 justify-center items-center">
               <a
                 href="/register"
@@ -151,7 +150,7 @@ const HomePage = () => {
                 <span>Create Account</span>
                 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-300" />
               </a>
-              
+
               <a
                 href="/products"
                 className="group bg-transparent text-white px-10 py-5 rounded-2xl font-semibold text-lg hover:bg-white/10 transition-all duration-300 transform hover:scale-105 flex items-center space-x-3 border border-gray-600"
@@ -168,7 +167,7 @@ const HomePage = () => {
                 { number: '20+', label: 'Villages', sublabel: 'গ্রাম' },
                 { number: '24/7', label: 'Support', sublabel: 'সাপোর্ট' }
               ].map((stat, index) => (
-                <div 
+                <div
                   key={index}
                   className="text-center group hover:scale-105 transition-transform duration-300"
                 >

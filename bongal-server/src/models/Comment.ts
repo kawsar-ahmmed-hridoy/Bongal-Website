@@ -32,7 +32,6 @@ const commentSchema = new Schema<IComment>(
   }
 );
 
-// Index for better query performance
 commentSchema.index({ post: 1, createdAt: -1 });
 
 const Comment = mongoose.model<IComment>('Comment', commentSchema);

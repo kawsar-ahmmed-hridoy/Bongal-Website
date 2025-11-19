@@ -28,7 +28,6 @@ const CreatePostModal = ({ onClose, onSuccess, categories }) => {
       }, 1500);
     },
     onError: (error) => {
-      console.error('Post creation error:', error);
       const errorMessage = error.response?.data?.message || error.message || 'Failed to create post';
       toast.error(errorMessage, {
         duration: 4000,
@@ -106,7 +105,6 @@ const CreatePostModal = ({ onClose, onSuccess, categories }) => {
 
         if (!response.ok) {
           const errorData = await response.json();
-          console.error('Image upload failed:', errorData);
           throw new Error(errorData.message || 'Failed to upload image');
         }
 
@@ -120,7 +118,6 @@ const CreatePostModal = ({ onClose, onSuccess, categories }) => {
 
       return uploadedImages;
     } catch (error) {
-      console.error('Image upload error:', error);
       toast.error(error.message || 'Failed to upload images');
       throw error;
     } finally {
@@ -142,20 +139,16 @@ const CreatePostModal = ({ onClose, onSuccess, categories }) => {
     }
 
     try {
-      // Upload images first if any
       const imageUrls = await uploadImages();
 
-      // Create post
       const postData = {
         content: formData.content.trim(),
         category: formData.category,
         images: imageUrls
       };
 
-      console.log('Submitting post data:', postData);
       createPostMutation.mutate(postData);
     } catch (error) {
-      console.error('Submit error:', error);
     }
   };
 
@@ -164,7 +157,6 @@ const CreatePostModal = ({ onClose, onSuccess, categories }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-bold text-gray-900">Share Your Story</h2>
           <button
@@ -175,9 +167,7 @@ const CreatePostModal = ({ onClose, onSuccess, categories }) => {
           </button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {/* Category Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Category
@@ -196,7 +186,6 @@ const CreatePostModal = ({ onClose, onSuccess, categories }) => {
             </select>
           </div>
 
-          {/* Content */}
           <div>
             <textarea
               name="content"
@@ -213,7 +202,6 @@ const CreatePostModal = ({ onClose, onSuccess, categories }) => {
             </div>
           </div>
 
-          {/* Images */}
           {imageFiles.length < 2 && (
             <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:border-primary-400 transition-colors">
               <input
@@ -235,7 +223,6 @@ const CreatePostModal = ({ onClose, onSuccess, categories }) => {
             </div>
           )}
 
-          {/* Image Preview */}
           {imagePreview.length > 0 && (
             <div className="grid grid-cols-2 gap-3">
               {imagePreview.map((url, index) => (
@@ -257,7 +244,6 @@ const CreatePostModal = ({ onClose, onSuccess, categories }) => {
             </div>
           )}
 
-          {/* Info Box */}
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
             <div className="flex items-center space-x-2">
               <AlertCircle className="text-amber-600" size={16} />
@@ -267,7 +253,6 @@ const CreatePostModal = ({ onClose, onSuccess, categories }) => {
             </div>
           </div>
 
-          {/* Submit Button */}
           <div className="flex space-x-3 pt-4 border-t border-gray-200">
             <button
               type="button"

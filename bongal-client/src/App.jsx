@@ -17,7 +17,6 @@ import NotFound from './components/common/NotFound';
 import VerifyCodePage from './components/auth/VerifyCodePage';
 import ProfilePage from './components/auth/ProfilePage';
 import ForgotPassword from './components/auth/ForgotPassword';
-import ContactPage from './components/common/ContactPage';
 import CommunityPage from './components/community/CommunityPage';
 import PostDetailPage from './components/community/PostDetailPage';
 
@@ -25,27 +24,21 @@ function App() {
   return (
     <AuthProvider>
       <CartProvider>
-
+        <Toaster position="top-right" />
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<HomePage />} />
             <Route path="cart" element={<CartPage />} />
             <Route path="checkout" element={<CheckOut />} />
             <Route path="register" element={<RegisterPage />} />
-            <Route path="/verify-code" element={<VerifyCodePage />} />
+            <Route path="verify-code" element={<VerifyCodePage />} />
             <Route path="login" element={<LoginPage />} />
+            <Route path="forgot-password" element={<ForgotPassword />} />
             <Route path="products/:id" element={<ProductDetail />} />
             <Route path="products" element={<ProductsPage />} />
+            <Route path="orders" element={<OrdersPage />} />
             <Route
-              path="orders"
-              element={
-
-                <OrdersPage />
-
-              }
-            />
-            <Route
-              path="/profile"
+              path="profile"
               element={
                 <ProtectedRoute>
                   <ProfilePage />
@@ -60,17 +53,8 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
-            <Route path="register" element={<RegisterPage />} />
-            <Route path="verify-code" element={<VerifyCodePage />} />
-            <Route path="login" element={<LoginPage />} />
-            <Route path="products/:id" element={<ProductDetail />} />
-            <Route path="products" element={<ProductsPage />} />
             <Route path="community" element={<CommunityPage />} />
             <Route path="community/post/:id" element={<PostDetailPage />} />
-            <Route path="contact" element={<ContactPage />} />
-            <Route path="forgot-password" element={<ForgotPassword />} />
-
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

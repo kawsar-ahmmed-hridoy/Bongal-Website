@@ -95,7 +95,6 @@ const CommentsSection = ({ postId, onCommentAdded, onCommentDeleted }) => {
 
   return (
     <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
-      {/* Comments List */}
       <div className="space-y-4 mb-4 max-h-96 overflow-y-auto">
         {isLoading ? (
           <p className="text-center text-gray-500">Loading comments...</p>
@@ -134,7 +133,6 @@ const CommentsSection = ({ postId, onCommentAdded, onCommentDeleted }) => {
         )}
       </div>
 
-      {/* Add Comment Form */}
       {user && (
         <form onSubmit={handleSubmit} className="flex space-x-2">
           <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">

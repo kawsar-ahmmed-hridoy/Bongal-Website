@@ -25,7 +25,7 @@ export const formatDateTime = (date) => {
 
 export const formatRelativeTime = (date) => {
   if (!date) return '';
-  
+
   const now = new Date();
   const past = new Date(date);
   const diffInSeconds = Math.floor((now - past) / 1000);
@@ -34,7 +34,7 @@ export const formatRelativeTime = (date) => {
   if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
   if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
   if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} days ago`;
-  
+
   return formatDate(date);
 };
 
@@ -143,7 +143,6 @@ export const copyToClipboard = async (text) => {
     await navigator.clipboard.writeText(text);
     return true;
   } catch (err) {
-    console.error('Failed to copy:', err);
     return false;
   }
 };

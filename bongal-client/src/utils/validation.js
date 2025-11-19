@@ -23,12 +23,7 @@ export const formatPrice = (price) => {
 export const validateName = (name) => {
   if (!name) return false;
   const trimmed = name.trim();
-  return (
-    // eslint-disable-next-line no-undef
-    trimmed.length >= VALIDATION_RULES.NAME_MIN_LENGTH &&
-    // eslint-disable-next-line no-undef
-    trimmed.length <= VALIDATION_RULES.NAME_MAX_LENGTH
-  );
+  return trimmed.length >= 2 && trimmed.length <= 50;
 };
 
 export const validateUrl = (url) => {

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Phone, Mail, MapPin, Facebook, Instagram, MessageCircle, Heart, ArrowUp } from 'lucide-react';
+import { Phone, Mail, MapPin, Facebook, Instagram, MessageCircle, ArrowUp } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 const Footer = () => {
@@ -74,8 +74,7 @@ const Footer = () => {
                 { path: '/', name: 'Home' },
                 { path: '/products', name: 'Products' },
                 { path: '/orders', name: 'Orders' },
-                { path: '/about', name: 'About Us' },
-                { path: '/contact', name: 'Contact' }
+                { path: '/about', name: 'About Us' }
               ].map((link, i) => (
                 <Link
                   key={i}

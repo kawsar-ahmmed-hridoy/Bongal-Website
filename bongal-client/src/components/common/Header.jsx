@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingCart, User, Menu, X, Package, LogOut, CheckCircle } from 'lucide-react';
+import { ShoppingCart, User, Menu, X, LogOut, CheckCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import NotificationBell from './NotificationBell';
@@ -83,15 +83,6 @@ const Header = () => {
                 }`}
             >
               Products
-            </Link>
-            <Link
-              to="/contact"
-              className={`px-5 py-2 rounded-2xl font-medium transition-all duration-300 ${isActiveLink('/contact')
-                ? 'bg-primary-800 text-white shadow-soft'
-                : 'text-primary-900 hover:bg-primary-50 hover:text-primary-800'
-                }`}
-            >
-              Contact
             </Link>
             <Link
               to="/community"
@@ -254,16 +245,6 @@ const Header = () => {
               onClick={() => setShowMobileMenu(false)}
             >
               Products
-            </Link>
-            <Link
-              to="/contact"
-              className={`block py-3 px-4 rounded-2xl font-medium transition-all duration-300 ${isActiveLink('/contact')
-                ? 'bg-primary-800 text-white shadow-soft'
-                : 'text-primary-900 hover:bg-primary-50'
-                }`}
-              onClick={() => setShowMobileMenu(false)}
-            >
-              Contact
             </Link>
             <Link
               to="/community"

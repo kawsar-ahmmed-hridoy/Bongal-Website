@@ -28,7 +28,6 @@ export const AuthProvider = ({ children }) => {
         setUser(userData);
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
       localStorage.removeItem('token');
     } finally {
       setLoading(false);
@@ -41,7 +40,6 @@ export const AuthProvider = ({ children }) => {
       setUser(data.user);
       return data;
     } catch (error) {
-      console.error('Login failed:', error);
       throw error;
     }
   };
@@ -49,11 +47,8 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const data = await authService.register(userData);
-      // Don't set user yet - wait for verification or skip
-      // setUser(data.user);
       return data;
     } catch (error) {
-      console.error('Registration failed:', error);
       throw error;
     }
   };
@@ -75,7 +70,6 @@ export const AuthProvider = ({ children }) => {
       return result.user;
 
     } catch (error) {
-      console.error('Profile update failed:', error);
       throw new Error(error.message || 'Failed to update profile');
     }
   };

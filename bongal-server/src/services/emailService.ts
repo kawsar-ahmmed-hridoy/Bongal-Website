@@ -4,13 +4,12 @@ export class EmailService {
   private transporter: nodemailer.Transporter;
 
   constructor() {
-    // Remove spaces from email password if any
     const emailPassword = process.env.EMAIL_PASSWORD?.replace(/\s/g, '') || '';
 
     this.transporter = nodemailer.createTransport({
       host: process.env.EMAIL_HOST,
       port: Number(process.env.EMAIL_PORT) || 587,
-      secure: false, // true for 465, false for other ports
+      secure: false,
       auth: {
         user: process.env.EMAIL_USER,
         pass: emailPassword,
@@ -19,23 +18,10 @@ export class EmailService {
         rejectUnauthorized: false
       }
     });
+  }
 
-    // Verify transporter configuration in development
-    if (process.env.NODE_ENV === 'development') {
-      this.transporter.verify((error, success) => {
-        if (error) {
-          console.error('Email transporter verification failed:', error);
-        } else {
-          console.log('✅ Email server is ready to send messages');
-        }
-      });
-    }
-  } async sendEmail(to: string, subject: string, html: string) {
+  async sendEmail(to: string, subject: string, html: string) {
     try {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('📧 Attempting to send email to:', to);
-      }
-
       const info = await this.transporter.sendMail({
         from: `"বঙ্গাল ~ ঐতিহ্যের সাথে বর্তমান" <${process.env.EMAIL_USER}>`,
         to,
@@ -43,15 +29,13 @@ export class EmailService {
         html,
       });
 
-      if (process.env.NODE_ENV === 'development') {
-        console.log('✅ Email sent successfully:', info.messageId);
-      }
       return info;
     } catch (error: any) {
-      console.error('Email send error:', error.message);
       throw new Error(`Failed to send email: ${error.message}`);
     }
-  } async sendVerificationEmail(email: string, verificationCode: string) {
+  }
+
+  async sendVerificationEmail(email: string, verificationCode: string) {
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h1>Use the verification code below to access your বঙ্গাল account. Thank you! </h1>
