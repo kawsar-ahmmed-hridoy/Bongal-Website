@@ -6,6 +6,9 @@ export interface IMessage extends Document {
   email: string;
   subject?: string;
   message: string;
+  adminReply?: string;
+  repliedBy?: mongoose.Types.ObjectId;
+  repliedAt?: Date;
   status: 'unread' | 'read' | 'replied';
   createdAt: Date;
   updatedAt: Date;
@@ -36,6 +39,16 @@ const messageSchema = new Schema<IMessage>(
     message: {
       type: String,
       required: true,
+    },
+    adminReply: {
+      type: String,
+    },
+    repliedBy: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    repliedAt: {
+      type: Date,
     },
     status: {
       type: String,

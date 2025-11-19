@@ -31,8 +31,9 @@ const CustomerSupportChat = () => {
   // Fetch user's message history when chat opens and user is logged in
   useEffect(() => {
     console.log('🔍 Chat useEffect triggered:', { isOpen, user: !!user, hasLoaded: hasLoadedRef.current });
-    if (isOpen && user && !hasLoadedRef.current) {
+    if (isOpen && user) {
       console.log('📞 Calling fetchMessages...');
+      hasLoadedRef.current = false; // Reset to reload when opening/maximizing
       fetchMessages();
     }
   }, [isOpen, user]);
@@ -53,15 +54,45 @@ const CustomerSupportChat = () => {
       const messageHistory = response.data || [];
       console.log('📩 Message history:', messageHistory.length, 'messages');
 
-      // Convert messages to chat format
-      const formattedMessages = messageHistory.map(msg => ({
-        text: msg.message,
-        subject: msg.subject,
-        sender: 'user',
-        time: new Date(msg.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-        date: new Date(msg.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        status: msg.status
-      }));
+      // Convert messages to chat format - include both user messages and admin replies
+      const formattedMessages = [];
+
+      messageHistory.forEach(msg => {
+        // Check if this is an admin-initiated message (has repliedAt but message is from admin)
+        const isAdminInitiated = msg.repliedAt && msg.repliedBy && msg.subject === 'Message from Admin';
+
+        if (isAdminInitiated) {
+          // Show only admin's message for admin-initiated conversations
+          formattedMessages.push({
+            text: msg.message,
+            sender: 'admin',
+            adminName: msg.repliedBy?.name || 'Support Team',
+            time: new Date(msg.repliedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+            date: new Date(msg.repliedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+          });
+        } else {
+          // User's message
+          formattedMessages.push({
+            text: msg.message,
+            subject: msg.subject,
+            sender: 'user',
+            time: new Date(msg.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+            date: new Date(msg.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            status: msg.status
+          });
+
+          // Add admin reply if exists
+          if (msg.adminReply) {
+            formattedMessages.push({
+              text: msg.adminReply,
+              sender: 'admin',
+              adminName: msg.repliedBy?.name || 'Support Team',
+              time: new Date(msg.repliedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+              date: new Date(msg.repliedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+            });
+          }
+        }
+      });
 
       console.log('✅ Setting messages:', formattedMessages);
       setMessages(formattedMessages);
@@ -188,17 +219,19 @@ const CustomerSupportChat = () => {
                 ) : (
                   <>
                     {/* Welcome Message */}
-                    <div className="flex items-start space-x-2">
-                      <div className="w-8 h-8 bg-primary-800 rounded-full flex items-center justify-center flex-shrink-0">
-                        <MessageCircle className="text-white" size={16} />
+                    {messages.length === 0 && (
+                      <div className="flex items-start space-x-2">
+                        <div className="w-8 h-8 bg-primary-800 rounded-full flex items-center justify-center flex-shrink-0">
+                          <MessageCircle className="text-white" size={16} />
+                        </div>
+                        <div className="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm max-w-[80%]">
+                          <p className="text-sm text-gray-800">
+                            Hi there! 👋 How can we help you today?
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">Bongal Support</p>
+                        </div>
                       </div>
-                      <div className="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm max-w-[80%]">
-                        <p className="text-sm text-gray-800">
-                          Hi there! 👋 How can we help you today?
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">Bongal Support</p>
-                      </div>
-                    </div>
+                    )}
 
                     {/* User Messages */}
                     {messages.length === 0 ? (
@@ -221,35 +254,47 @@ const CustomerSupportChat = () => {
 
                             {/* Message */}
                             <div className={`flex items-start space-x-2 ${msg.sender === 'user' ? 'justify-end' : ''}`}>
-                              {msg.sender !== 'user' && (
-                                <div className="w-8 h-8 bg-primary-800 rounded-full flex items-center justify-center flex-shrink-0">
+                              {msg.sender === 'admin' && (
+                                <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
                                   <MessageCircle className="text-white" size={16} />
                                 </div>
                               )}
                               <div
                                 className={`p-3 rounded-2xl shadow-sm max-w-[80%] ${msg.sender === 'user'
                                   ? 'bg-primary-800 text-white rounded-tr-none'
-                                  : 'bg-white text-gray-800 rounded-tl-none'
+                                  : msg.sender === 'admin'
+                                    ? 'bg-green-50 text-gray-800 rounded-tl-none border border-green-200'
+                                    : 'bg-white text-gray-800 rounded-tl-none'
                                   }`}
                               >
-                                {msg.subject && (
+                                {msg.sender === 'admin' && (
+                                  <p className="text-xs font-semibold mb-1 text-green-700">
+                                    {msg.adminName}
+                                  </p>
+                                )}
+                                {msg.subject && msg.sender === 'user' && (
                                   <p className={`text-xs font-semibold mb-1 ${msg.sender === 'user' ? 'text-primary-100' : 'text-gray-600'}`}>
                                     Re: {msg.subject}
                                   </p>
                                 )}
                                 <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
                                 <div className="flex items-center justify-between mt-1">
-                                  <p className={`text-xs ${msg.sender === 'user' ? 'text-primary-200' : 'text-gray-500'}`}>
+                                  <p className={`text-xs ${msg.sender === 'user'
+                                    ? 'text-primary-200'
+                                    : msg.sender === 'admin'
+                                      ? 'text-green-600'
+                                      : 'text-gray-500'
+                                    }`}>
                                     {msg.time}
                                   </p>
-                                  {msg.status && (
+                                  {msg.status && msg.sender === 'user' && (
                                     <span className={`text-xs ${msg.status === 'replied'
                                       ? 'text-green-400'
                                       : msg.status === 'read'
                                         ? 'text-blue-400'
                                         : 'text-gray-400'
                                       }`}>
-                                      {msg.status === 'replied' ? '✓✓' : msg.status === 'read' ? '✓' : '○'}
+                                      {msg.status === 'replied' ? '✓✓✓' : msg.status === 'read' ? '✓✓' : '○'}
                                     </span>
                                   )}
                                 </div>
