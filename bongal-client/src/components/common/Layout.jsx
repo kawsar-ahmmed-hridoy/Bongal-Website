@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import { Toaster } from 'react-hot-toast';
 import Header from "./Header";
 import Footer from "./Footer";
+import CustomerSupportChat from "./CustomerSupportChat";
 
 const Layout = () => {
   return (
@@ -33,6 +34,9 @@ const Layout = () => {
         <Outlet />
       </main>
       <Footer />
+
+      {/* Floating Customer Support Chat */}
+      <CustomerSupportChat />
     </div>
   );
 };

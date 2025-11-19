@@ -66,6 +66,9 @@ export const admin = (req: any, res: Response, next: NextFunction) => {
   }
 };
 
+// Alias for admin middleware
+export const requireAdmin = admin;
+
 export const optionalAuth = async (
   req: any,
   res: Response,

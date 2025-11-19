@@ -13,22 +13,22 @@ export const messageService = {
     return response.data;
   },
 
-  // Admin: Get all messages
-  getAllMessages: async (status = '') => {
+  // Admin: Get conversations grouped by user
+  getConversations: async (status = '') => {
     const params = status ? { status } : {};
-    const response = await api.get('/messages', { params });
+    const response = await api.get('/messages/conversations', { params });
     return response.data;
   },
 
-  // Admin: Get single message
-  getMessageById: async (id) => {
-    const response = await api.get(`/messages/${id}`);
+  // Admin: Get conversation with specific user
+  getUserConversation: async (userId) => {
+    const response = await api.get(`/messages/conversations/${userId}`);
     return response.data;
   },
 
-  // Admin: Update message status
-  updateMessageStatus: async (id, status) => {
-    const response = await api.patch(`/messages/${id}/status`, { status });
+  // Admin: Send message to user
+  sendMessageToUser: async (userId, message) => {
+    const response = await api.post(`/messages/send/${userId}`, { message });
     return response.data;
   },
 
