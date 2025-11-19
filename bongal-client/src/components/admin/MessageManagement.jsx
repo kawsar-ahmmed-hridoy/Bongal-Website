@@ -12,26 +12,38 @@ const MessageManagement = () => {
   const [conversationMessages, setConversationMessages] = useState([]);
   const [replyText, setReplyText] = useState('');
   const messagesEndRef = useRef(null);
+  const prevMessageCountRef = useRef(0);
   const queryClient = useQueryClient();
 
   const { data: conversationsData, isLoading } = useQuery({
     queryKey: ['admin-conversations', selectedStatus],
     queryFn: () => messageService.getConversations(selectedStatus),
     refetchOnWindowFocus: false,
-    refetchInterval: 3000, // Auto-refresh every 3 seconds
+    refetchInterval: 5000,
+    notifyOnChangeProps: ['data', 'error'], // Only trigger re-render on actual data changes
   });
 
   const { data: conversationData, isLoading: isLoadingConversation } = useQuery({
     queryKey: ['admin-conversation', selectedConversation?._id],
     queryFn: () => messageService.getUserConversation(selectedConversation._id),
     enabled: !!selectedConversation,
-    refetchInterval: selectedConversation ? 2000 : false, // Auto-refresh every 2 seconds when conversation is open
+    refetchInterval: selectedConversation ? 5000 : false,
+    notifyOnChangeProps: ['data', 'error'], // Only trigger re-render on actual data changes
   });
 
-  // Update conversation messages when data changes
+  // Update conversation messages only when count changes
   useEffect(() => {
     if (conversationData?.messages) {
-      setConversationMessages(conversationData.messages);
+      const newCount = conversationData.messages.length;
+      if (newCount !== prevMessageCountRef.current) {
+        setConversationMessages(conversationData.messages);
+        prevMessageCountRef.current = newCount;
+
+        // Scroll to bottom only when new messages arrive
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }, 100);
+      }
     }
   }, [conversationData]);
 
@@ -67,24 +79,18 @@ const MessageManagement = () => {
     return matchesSearch;
   });
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [conversationMessages]);
-
   const handleViewConversation = (conversation) => {
     setSelectedConversation(conversation);
     setConversationMessages([]);
     setReplyText('');
+    prevMessageCountRef.current = 0;
   };
 
   const handleBackToList = () => {
     setSelectedConversation(null);
     setConversationMessages([]);
     setReplyText('');
+    prevMessageCountRef.current = 0;
   };
 
   const handleSendReply = () => {
