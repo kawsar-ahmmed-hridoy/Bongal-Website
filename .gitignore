@@ -30,3 +30,10 @@ bongal-server/logs/
 
 coverage/
 *.lcov
+
+# Deployment guideline files (keep locally, not in repo)
+DEPLOYMENT_GUIDE.md
+START_HERE.md
+DEPLOYMENT_CHECKLIST.md
+CREDENTIALS.md
+deployment-tester.html

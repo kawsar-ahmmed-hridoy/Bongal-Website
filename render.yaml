@@ -1,0 +1,50 @@
+services:
+  # Backend API
+  - type: web
+    name: bongal-api
+    runtime: node
+    region: singapore
+    plan: free
+    buildCommand: cd bongal-server && npm install && npm run build
+    startCommand: cd bongal-server && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRE
+        value: 30d
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: EMAIL_HOST
+        value: smtp.gmail.com
+      - key: EMAIL_PORT
+        value: 587
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: CLIENT_URL
+        sync: false
+
+  # Frontend Web App
+  - type: web
+    name: bongal-client
+    runtime: node
+    region: singapore
+    plan: free
+    buildCommand: cd bongal-client && npm install && npm run build
+    startCommand: cd bongal-client && npm run preview -- --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: VITE_API_URL
+        value: https://bongal-api.onrender.com/api
