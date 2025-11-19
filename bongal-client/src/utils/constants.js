@@ -7,6 +7,8 @@ export const CATEGORIES = [
   { id: 'handicraft', name: 'Handicrafts', name_bn: 'হস্তশিল্প' },
   { id: 'spices', name: 'Spices', name_bn: 'মসলা' },
   { id: 'dairy', name: 'Dairy', name_bn: 'দুগ্ধজাত' },
+  { id: 'Molasses', name: 'Molasses', name_bn: 'খেজুরের গুড়' },
+  { id: 'Others', name: 'Others', name_bn: 'অন্যান্য' },
 ];
 
 export const ORDER_STATUS = {
