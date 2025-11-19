@@ -11,94 +11,94 @@ const CustomerSupportChat = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [formData, setFormData] = useState({
-    subject: '',
     message: ''
   });
   const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState([]);
   const [fetchingMessages, setFetchingMessages] = useState(false);
   const messagesEndRef = useRef(null);
-  const hasLoadedRef = useRef(false);
+  const messagesContainerRef = useRef(null);
+  const pollingIntervalRef = useRef(null);
+  const isUserScrollingRef = useRef(false);
+  const prevMessagesLengthRef = useRef(0);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const scrollToBottom = (behavior = 'smooth') => {
+    messagesEndRef.current?.scrollIntoView({ behavior });
   };
 
+  // Track if user is manually scrolling
+  const handleScroll = () => {
+    if (!messagesContainerRef.current) return;
+    
+    const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+    const isAtBottom = scrollHeight - scrollTop - clientHeight < 50;
+    
+    // If user scrolls up, mark as manually scrolling
+    isUserScrollingRef.current = !isAtBottom;
+  };
+
+  // Smart scroll - only scroll when new messages arrive or user is at bottom
   useEffect(() => {
-    scrollToBottom();
+    const hasNewMessages = messages.length > prevMessagesLengthRef.current;
+    
+    if (hasNewMessages || !isUserScrollingRef.current) {
+      // Instant scroll for initial load or when at bottom
+      const behavior = prevMessagesLengthRef.current === 0 ? 'instant' : 'smooth';
+      scrollToBottom(behavior);
+    }
+    
+    prevMessagesLengthRef.current = messages.length;
   }, [messages]);
 
   // Fetch user's message history when chat opens and user is logged in
   useEffect(() => {
-    console.log('🔍 Chat useEffect triggered:', { isOpen, user: !!user, hasLoaded: hasLoadedRef.current });
     if (isOpen && user) {
-      console.log('📞 Calling fetchMessages...');
-      hasLoadedRef.current = false; // Reset to reload when opening/maximizing
       fetchMessages();
+
+      // Start polling for new messages every 2 seconds
+      pollingIntervalRef.current = setInterval(() => {
+        fetchMessages();
+      }, 2000);
+    } else {
+      // Clear polling when chat is closed
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
     }
+
+    // Cleanup on unmount
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+    };
   }, [isOpen, user]);
 
   const fetchMessages = async () => {
-    if (fetchingMessages || hasLoadedRef.current) {
-      console.log('⏭️ Skipping fetch - already loading or loaded');
+    if (fetchingMessages) {
       return;
     }
 
-    hasLoadedRef.current = true;
     setFetchingMessages(true);
-    console.log('📡 Fetching messages from server...');
 
     try {
       const response = await messageService.getMyMessages();
-      console.log('📨 Response received:', response);
       const messageHistory = response.data || [];
-      console.log('📩 Message history:', messageHistory.length, 'messages');
 
-      // Convert messages to chat format - include both user messages and admin replies
-      const formattedMessages = [];
+      // Convert messages to chat format
+      const formattedMessages = messageHistory.map(msg => ({
+        text: msg.message,
+        sender: msg.isFromAdmin ? 'admin' : 'user',
+        adminName: msg.sentBy?.name || 'Support Team',
+        time: new Date(msg.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+        date: new Date(msg.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        status: msg.status
+      }));
 
-      messageHistory.forEach(msg => {
-        // Check if this is an admin-initiated message (has repliedAt but message is from admin)
-        const isAdminInitiated = msg.repliedAt && msg.repliedBy && msg.subject === 'Message from Admin';
-
-        if (isAdminInitiated) {
-          // Show only admin's message for admin-initiated conversations
-          formattedMessages.push({
-            text: msg.message,
-            sender: 'admin',
-            adminName: msg.repliedBy?.name || 'Support Team',
-            time: new Date(msg.repliedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-            date: new Date(msg.repliedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-          });
-        } else {
-          // User's message
-          formattedMessages.push({
-            text: msg.message,
-            subject: msg.subject,
-            sender: 'user',
-            time: new Date(msg.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-            date: new Date(msg.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-            status: msg.status
-          });
-
-          // Add admin reply if exists
-          if (msg.adminReply) {
-            formattedMessages.push({
-              text: msg.adminReply,
-              sender: 'admin',
-              adminName: msg.repliedBy?.name || 'Support Team',
-              time: new Date(msg.repliedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-              date: new Date(msg.repliedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-            });
-          }
-        }
-      });
-
-      console.log('✅ Setting messages:', formattedMessages);
       setMessages(formattedMessages);
     } catch (error) {
-      console.error('❌ Failed to fetch messages:', error);
-      hasLoadedRef.current = false; // Reset on error so it can retry
+      console.error('Failed to fetch messages:', error);
     } finally {
       setFetchingMessages(false);
     }
@@ -126,7 +126,6 @@ const CustomerSupportChat = () => {
       // Add message to local state for immediate feedback
       const newMessage = {
         text: formData.message,
-        subject: formData.subject,
         sender: 'user',
         time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
         date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
@@ -137,7 +136,6 @@ const CustomerSupportChat = () => {
 
       // Reset form
       setFormData({
-        subject: '',
         message: ''
       });
     } catch (error) {
@@ -272,11 +270,6 @@ const CustomerSupportChat = () => {
                                     {msg.adminName}
                                   </p>
                                 )}
-                                {msg.subject && msg.sender === 'user' && (
-                                  <p className={`text-xs font-semibold mb-1 ${msg.sender === 'user' ? 'text-primary-100' : 'text-gray-600'}`}>
-                                    Re: {msg.subject}
-                                  </p>
-                                )}
                                 <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
                                 <div className="flex items-center justify-between mt-1">
                                   <p className={`text-xs ${msg.sender === 'user'
@@ -288,13 +281,11 @@ const CustomerSupportChat = () => {
                                     {msg.time}
                                   </p>
                                   {msg.status && msg.sender === 'user' && (
-                                    <span className={`text-xs ${msg.status === 'replied'
-                                      ? 'text-green-400'
-                                      : msg.status === 'read'
-                                        ? 'text-blue-400'
-                                        : 'text-gray-400'
+                                    <span className={`text-xs ${msg.status === 'read'
+                                      ? 'text-blue-400'
+                                      : 'text-gray-400'
                                       }`}>
-                                      {msg.status === 'replied' ? '✓✓✓' : msg.status === 'read' ? '✓✓' : '○'}
+                                      {msg.status === 'read' ? '✓✓' : '○'}
                                     </span>
                                   )}
                                 </div>
@@ -334,18 +325,6 @@ const CustomerSupportChat = () => {
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-3">
-                    {/* Optional Subject Field - Hidden by default, can be toggled */}
-                    {formData.subject !== undefined && formData.subject !== '' && (
-                      <input
-                        type="text"
-                        name="subject"
-                        value={formData.subject}
-                        onChange={handleChange}
-                        placeholder="Subject (optional)"
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-600 focus:border-transparent"
-                      />
-                    )}
-
                     <div className="flex items-end space-x-2">
                       <textarea
                         name="message"

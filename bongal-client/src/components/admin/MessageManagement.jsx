@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Mail, Eye, Trash2, Clock, User, MessageCircle, Filter, Search, Check, AlertCircle, X, Send, ArrowLeft } from 'lucide-react';
+import { User, MessageCircle, Filter, Search, Check, AlertCircle, Send, ArrowLeft, Eye } from 'lucide-react';
 import { messageService } from '../../services/messageService';
 import { formatDate } from '../../utils/helpers';
 import toast from 'react-hot-toast';
@@ -18,41 +18,22 @@ const MessageManagement = () => {
     queryKey: ['admin-conversations', selectedStatus],
     queryFn: () => messageService.getConversations(selectedStatus),
     refetchOnWindowFocus: false,
+    refetchInterval: 3000, // Auto-refresh every 3 seconds
   });
 
   const { data: conversationData, isLoading: isLoadingConversation } = useQuery({
     queryKey: ['admin-conversation', selectedConversation?._id],
     queryFn: () => messageService.getUserConversation(selectedConversation._id),
     enabled: !!selectedConversation,
+    refetchInterval: selectedConversation ? 2000 : false, // Auto-refresh every 2 seconds when conversation is open
   });
 
   // Update conversation messages when data changes
   useEffect(() => {
     if (conversationData?.messages) {
-      console.log('Conversation data loaded:', conversationData.messages);
       setConversationMessages(conversationData.messages);
     }
   }, [conversationData]);
-
-  const replyMutation = useMutation({
-    mutationFn: ({ id, reply }) => messageService.replyToMessage(id, reply),
-    onSuccess: async () => {
-      setReplyText('');
-      toast.success('Reply sent successfully');
-      // Refetch conversation data and update immediately
-      const updatedData = await queryClient.fetchQuery({
-        queryKey: ['admin-conversation', selectedConversation._id],
-        queryFn: () => messageService.getUserConversation(selectedConversation._id),
-      });
-      if (updatedData?.messages) {
-        setConversationMessages(updatedData.messages);
-      }
-      queryClient.invalidateQueries(['admin-conversations']);
-    },
-    onError: (error) => {
-      toast.error(error.response?.data?.message || 'Failed to send reply');
-    },
-  });
 
   const sendMessageMutation = useMutation({
     mutationFn: ({ userId, message }) => messageService.sendMessageToUser(userId, message),
@@ -75,7 +56,7 @@ const MessageManagement = () => {
   });
 
   const conversations = conversationsData?.conversations || [];
-  const stats = conversationsData?.stats || { total: 0, unread: 0, read: 0, replied: 0, totalUsers: 0 };
+  const stats = conversationsData?.stats || { total: 0, unread: 0, read: 0, totalUsers: 0 };
 
   const filteredConversations = conversations.filter(conversation => {
     const matchesSearch = !searchTerm ||
@@ -95,9 +76,8 @@ const MessageManagement = () => {
   }, [conversationMessages]);
 
   const handleViewConversation = (conversation) => {
-    console.log('Opening conversation for user:', conversation);
     setSelectedConversation(conversation);
-    setConversationMessages([]); // Clear previous messages
+    setConversationMessages([]);
     setReplyText('');
   };
 
@@ -109,34 +89,14 @@ const MessageManagement = () => {
 
   const handleSendReply = () => {
     if (!replyText.trim()) {
-      toast.error('Please enter a reply');
+      toast.error('Please enter a message');
       return;
     }
 
-    // Always send as a new admin message to avoid confusion
-    // This ensures messages are sent immediately and appear in the conversation
     sendMessageMutation.mutate({
       userId: selectedConversation._id,
       message: replyText
     });
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'unread': return 'bg-red-100 text-red-800';
-      case 'read': return 'bg-yellow-100 text-yellow-800';
-      case 'replied': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'unread': return <AlertCircle size={16} />;
-      case 'read': return <Eye size={16} />;
-      case 'replied': return <Check size={16} />;
-      default: return <MessageCircle size={16} />;
-    }
   };
 
   if (isLoading) {
@@ -152,7 +112,7 @@ const MessageManagement = () => {
     return (
       <div className="space-y-6">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-white p-4 rounded-2xl shadow-soft border border-gray-100">
             <div className="flex items-center space-x-3">
               <div className="bg-purple-100 p-2 rounded-xl">
@@ -191,24 +151,12 @@ const MessageManagement = () => {
 
           <div className="bg-white p-4 rounded-2xl shadow-soft border border-gray-100">
             <div className="flex items-center space-x-3">
-              <div className="bg-yellow-100 p-2 rounded-xl">
-                <Eye className="text-yellow-600" size={20} />
+              <div className="bg-green-100 p-2 rounded-xl">
+                <Eye className="text-green-600" size={20} />
               </div>
               <div>
                 <p className="text-sm text-gray-600">Read</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.read}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-4 rounded-2xl shadow-soft border border-gray-100">
-            <div className="flex items-center space-x-3">
-              <div className="bg-green-100 p-2 rounded-xl">
-                <Check className="text-green-600" size={20} />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Replied</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.replied}</p>
               </div>
             </div>
           </div>
@@ -228,7 +176,6 @@ const MessageManagement = () => {
                   <option value="">All Conversations</option>
                   <option value="unread">Unread</option>
                   <option value="read">Read</option>
-                  <option value="replied">Replied</option>
                 </select>
               </div>
             </div>
@@ -345,9 +292,6 @@ const MessageManagement = () => {
                     new Date(msg.createdAt).toLocaleDateString() !==
                     new Date(conversationMessages[index - 1]?.createdAt).toLocaleDateString();
 
-                  // Check if this is an admin-initiated message
-                  const isAdminInitiated = msg.subject === 'Message from Admin';
-
                   return (
                     <div key={msg._id}>
                       {/* Date Separator */}
@@ -363,13 +307,10 @@ const MessageManagement = () => {
                         </div>
                       )}
 
-                      {/* User Message (only show if not admin-initiated) */}
-                      {!isAdminInitiated && (
+                      {/* User Message */}
+                      {!msg.isFromAdmin && (
                         <div className="flex justify-start mb-2">
                           <div className="max-w-[70%]">
-                            {msg.subject && msg.subject !== 'Message from Admin' && (
-                              <p className="text-xs text-gray-500 mb-1">Subject: {msg.subject}</p>
-                            )}
                             <div className="bg-gray-100 text-gray-800 p-3 rounded-2xl rounded-tl-none">
                               <p className="text-xs text-gray-600 font-semibold mb-1">
                                 {msg.name || 'User'}
@@ -388,20 +329,18 @@ const MessageManagement = () => {
                         </div>
                       )}
 
-                      {/* Admin Reply or Admin-Initiated Message */}
-                      {(msg.adminReply || isAdminInitiated) && (
+                      {/* Admin Message */}
+                      {msg.isFromAdmin && (
                         <div className="flex justify-end mt-2">
                           <div className="max-w-[70%]">
                             <div className="bg-primary-600 text-white p-3 rounded-2xl rounded-tr-none">
                               <p className="text-xs text-primary-100 font-semibold mb-1">
-                                {msg.repliedBy?.name || 'Admin'}
+                                {msg.sentBy?.name || 'Admin'}
                               </p>
-                              <p className="text-sm whitespace-pre-wrap">
-                                {isAdminInitiated ? msg.message : msg.adminReply}
-                              </p>
+                              <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
                               <div className="flex items-center justify-end space-x-2 mt-1">
                                 <span className="text-xs text-primary-200">
-                                  {new Date(isAdminInitiated ? msg.createdAt : msg.repliedAt).toLocaleTimeString('en-US', {
+                                  {new Date(msg.createdAt).toLocaleTimeString('en-US', {
                                     hour: '2-digit',
                                     minute: '2-digit'
                                   })}
@@ -436,10 +375,10 @@ const MessageManagement = () => {
                 />
                 <button
                   onClick={handleSendReply}
-                  disabled={replyMutation.isLoading || !replyText.trim()}
+                  disabled={sendMessageMutation.isLoading || !replyText.trim()}
                   className="bg-primary-600 text-white p-3 rounded-xl hover:bg-primary-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
-                  {replyMutation.isLoading ? (
+                  {sendMessageMutation.isLoading ? (
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : (
                     <Send size={20} />
