@@ -5,10 +5,10 @@ interface AuthRequest extends Request {
   user?: any;
 }
 
-// Create a new message (authenticated users only)
+// Create a new message from user (authenticated users only)
 export const createMessage = async (req: AuthRequest, res: Response) => {
   try {
-    const { subject, message } = req.body;
+    const { message } = req.body;
 
     if (!message || !message.trim()) {
       return res.status(400).json({
@@ -21,8 +21,8 @@ export const createMessage = async (req: AuthRequest, res: Response) => {
       user: req.user?._id,
       name: req.user?.name,
       email: req.user?.email,
-      subject: subject || '',
       message: message.trim(),
+      isFromAdmin: false,
       status: 'unread',
     });
 
@@ -39,47 +39,20 @@ export const createMessage = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Get all messages (admin only)
-export const getAllMessages = async (req: Request, res: Response) => {
-  try {
-    const { status } = req.query;
-
-    const filter: any = {};
-    if (status && ['unread', 'read', 'replied'].includes(status as string)) {
-      filter.status = status;
-    }
-
-    const messages = await Message.find(filter)
-      .populate('user', 'name email phone')
-      .sort({ createdAt: -1 });
-
-    const stats = {
-      total: await Message.countDocuments(),
-      unread: await Message.countDocuments({ status: 'unread' }),
-      read: await Message.countDocuments({ status: 'read' }),
-      replied: await Message.countDocuments({ status: 'replied' }),
-    };
-
-    res.json({
-      success: true,
-      messages,
-      stats,
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: error.message || 'Failed to fetch messages',
-    });
-  }
-};
-
 // Get all conversations grouped by user (admin only)
 export const getConversations = async (req: Request, res: Response) => {
   try {
     const { status } = req.query;
 
+    // Build match filter
+    const matchFilter: any = {};
+    if (status && ['unread', 'read'].includes(status as string)) {
+      matchFilter.status = status;
+    }
+
     // Aggregate messages by user
     const pipeline: any[] = [
+      ...(Object.keys(matchFilter).length > 0 ? [{ $match: matchFilter }] : []),
       {
         $lookup: {
           from: 'users',
@@ -127,18 +100,12 @@ export const getConversations = async (req: Request, res: Response) => {
       }
     ];
 
-    // Apply status filter if provided
-    if (status && ['unread', 'read', 'replied'].includes(status as string)) {
-      pipeline.unshift({ $match: { status } });
-    }
-
     const conversations = await Message.aggregate(pipeline);
 
     const stats = {
       total: await Message.countDocuments(),
       unread: await Message.countDocuments({ status: 'unread' }),
       read: await Message.countDocuments({ status: 'read' }),
-      replied: await Message.countDocuments({ status: 'replied' }),
       totalUsers: conversations.length,
     };
 
@@ -162,7 +129,7 @@ export const getUserConversation = async (req: Request, res: Response) => {
 
     const messages = await Message.find({ user: userId })
       .populate('user', 'name email phone')
-      .populate('repliedBy', 'name')
+      .populate('sentBy', 'name')
       .sort({ createdAt: 1 });
 
     if (messages.length === 0) {
@@ -172,9 +139,9 @@ export const getUserConversation = async (req: Request, res: Response) => {
       });
     }
 
-    // Mark unread messages as read
+    // Mark unread user messages as read
     await Message.updateMany(
-      { user: userId, status: 'unread' },
+      { user: userId, status: 'unread', isFromAdmin: false },
       { status: 'read' }
     );
 
@@ -191,108 +158,11 @@ export const getUserConversation = async (req: Request, res: Response) => {
   }
 };
 
-// Get single message (admin only)
-export const getMessageById = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-
-    const message = await Message.findById(id).populate('user', 'name email phone address');
-
-    if (!message) {
-      return res.status(404).json({
-        success: false,
-        message: 'Message not found',
-      });
-    }
-
-    // Mark as read if it was unread
-    if (message.status === 'unread') {
-      message.status = 'read';
-      await message.save();
-    }
-
-    res.json({
-      success: true,
-      message,
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: error.message || 'Failed to fetch message',
-    });
-  }
-};
-
-// Update message status (admin only)
-export const updateMessageStatus = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const { status } = req.body;
-
-    if (!['unread', 'read', 'replied'].includes(status)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid status value',
-      });
-    }
-
-    const message = await Message.findByIdAndUpdate(
-      id,
-      { status },
-      { new: true }
-    ).populate('user', 'name email phone');
-
-    if (!message) {
-      return res.status(404).json({
-        success: false,
-        message: 'Message not found',
-      });
-    }
-
-    res.json({
-      success: true,
-      message: 'Message status updated',
-      data: message,
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: error.message || 'Failed to update message status',
-    });
-  }
-};
-
-// Delete message (admin only)
-export const deleteMessage = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-
-    const message = await Message.findByIdAndDelete(id);
-
-    if (!message) {
-      return res.status(404).json({
-        success: false,
-        message: 'Message not found',
-      });
-    }
-
-    res.json({
-      success: true,
-      message: 'Message deleted successfully',
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: error.message || 'Failed to delete message',
-    });
-  }
-};
-
-// Get messages by current user (authenticated users)
+// Get messages for current user (authenticated users)
 export const getUserMessages = async (req: AuthRequest, res: Response) => {
   try {
     const messages = await Message.find({ user: req.user?._id })
-      .populate('repliedBy', 'name')
+      .populate('sentBy', 'name')
       .sort({ createdAt: 1 });
 
     res.json({
@@ -307,52 +177,7 @@ export const getUserMessages = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Reply to message (admin only)
-export const replyToMessage = async (req: AuthRequest, res: Response) => {
-  try {
-    const { id } = req.params;
-    const { reply } = req.body;
-
-    if (!reply || !reply.trim()) {
-      return res.status(400).json({
-        success: false,
-        message: 'Reply content is required'
-      });
-    }
-
-    const message = await Message.findById(id);
-
-    if (!message) {
-      return res.status(404).json({
-        success: false,
-        message: 'Message not found',
-      });
-    }
-
-    message.adminReply = reply.trim();
-    message.repliedBy = req.user?._id;
-    message.repliedAt = new Date();
-    message.status = 'replied';
-    await message.save();
-
-    const populatedMessage = await Message.findById(id)
-      .populate('user', 'name email phone')
-      .populate('repliedBy', 'name');
-
-    res.json({
-      success: true,
-      message: 'Reply sent successfully',
-      data: populatedMessage,
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: error.message || 'Failed to send reply',
-    });
-  }
-};
-
-// Send message to user (admin only)
+// Send message to user from admin (admin only)
 export const sendMessageToUser = async (req: AuthRequest, res: Response) => {
   try {
     const { userId } = req.params;
@@ -381,17 +206,15 @@ export const sendMessageToUser = async (req: AuthRequest, res: Response) => {
       user: userId,
       name: user.name,
       email: user.email,
-      subject: 'Message from Admin',
       message: message.trim(),
-      adminReply: '',
-      status: 'replied',
-      repliedBy: req.user?._id,
-      repliedAt: new Date(),
+      isFromAdmin: true,
+      sentBy: req.user?._id,
+      status: 'read',
     });
 
     const populatedMessage = await Message.findById(newMessage._id)
       .populate('user', 'name email phone')
-      .populate('repliedBy', 'name');
+      .populate('sentBy', 'name');
 
     res.status(201).json({
       success: true,
@@ -402,6 +225,32 @@ export const sendMessageToUser = async (req: AuthRequest, res: Response) => {
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to send message',
+    });
+  }
+};
+
+// Delete message (admin only)
+export const deleteMessage = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const message = await Message.findByIdAndDelete(id);
+
+    if (!message) {
+      return res.status(404).json({
+        success: false,
+        message: 'Message not found',
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Message deleted successfully',
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to delete message',
     });
   }
 };

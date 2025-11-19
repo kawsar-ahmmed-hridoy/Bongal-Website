@@ -4,12 +4,10 @@ export interface IMessage extends Document {
   user: mongoose.Types.ObjectId;
   name: string;
   email: string;
-  subject?: string;
   message: string;
-  adminReply?: string;
-  repliedBy?: mongoose.Types.ObjectId;
-  repliedAt?: Date;
-  status: 'unread' | 'read' | 'replied';
+  isFromAdmin: boolean;
+  sentBy?: mongoose.Types.ObjectId;
+  status: 'unread' | 'read';
   createdAt: Date;
   updatedAt: Date;
 }
@@ -32,27 +30,21 @@ const messageSchema = new Schema<IMessage>(
       trim: true,
       lowercase: true,
     },
-    subject: {
-      type: String,
-      trim: true,
-    },
     message: {
       type: String,
       required: true,
     },
-    adminReply: {
-      type: String,
+    isFromAdmin: {
+      type: Boolean,
+      default: false,
     },
-    repliedBy: {
+    sentBy: {
       type: Schema.Types.ObjectId,
       ref: 'User',
     },
-    repliedAt: {
-      type: Date,
-    },
     status: {
       type: String,
-      enum: ['unread', 'read', 'replied'],
+      enum: ['unread', 'read'],
       default: 'unread',
     },
   },
@@ -63,7 +55,7 @@ const messageSchema = new Schema<IMessage>(
 
 // Index for efficient queries
 messageSchema.index({ user: 1, createdAt: -1 });
-messageSchema.index({ status: 1, createdAt: -1 });
+messageSchema.index({ status: 1 });
 
 const Message = mongoose.model<IMessage>('Message', messageSchema);
 
