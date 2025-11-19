@@ -173,11 +173,11 @@ export const deleteMessage = async (req: Request, res: Response) => {
 // Get messages by current user (authenticated users)
 export const getUserMessages = async (req: AuthRequest, res: Response) => {
   try {
-    const messages = await Message.find({ user: req.user?._id }).sort({ createdAt: -1 });
+    const messages = await Message.find({ user: req.user?._id }).sort({ createdAt: 1 });
 
     res.json({
       success: true,
-      messages,
+      data: messages,
     });
   } catch (error: any) {
     res.status(500).json({
