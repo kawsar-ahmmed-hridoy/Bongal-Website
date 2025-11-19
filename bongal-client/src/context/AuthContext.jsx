@@ -49,7 +49,8 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const data = await authService.register(userData);
-      setUser(data.user);
+      // Don't set user yet - wait for verification or skip
+      // setUser(data.user);
       return data;
     } catch (error) {
       console.error('Registration failed:', error);
@@ -65,7 +66,7 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = async (profileData) => {
     try {
       const result = await authService.updateProfile(profileData);
-      
+
       if (!result.success) {
         throw new Error(result.message || 'Failed to update profile');
       }

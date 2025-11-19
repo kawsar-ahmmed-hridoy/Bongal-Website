@@ -5,10 +5,10 @@ interface AuthRequest extends Request {
   user?: any;
 }
 
-// Create a new message (authenticated users only)
+// Create a new message from user (authenticated users only)
 export const createMessage = async (req: AuthRequest, res: Response) => {
   try {
-    const { subject, message } = req.body;
+    const { message } = req.body;
 
     if (!message || !message.trim()) {
       return res.status(400).json({
@@ -21,8 +21,8 @@ export const createMessage = async (req: AuthRequest, res: Response) => {
       user: req.user?._id,
       name: req.user?.name,
       email: req.user?.email,
-      subject: subject || '',
       message: message.trim(),
+      isFromAdmin: false,
       status: 'unread',
     });
 
@@ -39,107 +39,192 @@ export const createMessage = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Get all messages (admin only)
-export const getAllMessages = async (req: Request, res: Response) => {
+// Get all conversations grouped by user (admin only)
+export const getConversations = async (req: Request, res: Response) => {
   try {
     const { status } = req.query;
 
-    const filter: any = {};
-    if (status && ['unread', 'read', 'replied'].includes(status as string)) {
-      filter.status = status;
+    // Build match filter
+    const matchFilter: any = {};
+    if (status && ['unread', 'read'].includes(status as string)) {
+      matchFilter.status = status;
     }
 
-    const messages = await Message.find(filter)
-      .populate('user', 'name email phone')
-      .sort({ createdAt: -1 });
+    // Aggregate messages by user
+    const pipeline: any[] = [
+      ...(Object.keys(matchFilter).length > 0 ? [{ $match: matchFilter }] : []),
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'user',
+          foreignField: '_id',
+          as: 'userDetails'
+        }
+      },
+      { $unwind: '$userDetails' },
+      {
+        $sort: { createdAt: -1 }
+      },
+      {
+        $group: {
+          _id: '$user',
+          userName: { $first: '$userDetails.name' },
+          userEmail: { $first: '$userDetails.email' },
+          userPhone: { $first: '$userDetails.phone' },
+          lastMessage: { $first: '$message' },
+          lastMessageDate: { $first: '$createdAt' },
+          unreadCount: {
+            $sum: { $cond: [{ $eq: ['$status', 'unread'] }, 1, 0] }
+          },
+          totalMessages: { $sum: 1 },
+          hasUnread: {
+            $max: { $cond: [{ $eq: ['$status', 'unread'] }, 1, 0] }
+          }
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          userName: 1,
+          userEmail: 1,
+          userPhone: 1,
+          lastMessage: 1,
+          lastMessageDate: 1,
+          unreadCount: 1,
+          totalMessages: 1,
+          hasUnread: 1
+        }
+      },
+      {
+        $sort: { lastMessageDate: -1 }
+      }
+    ];
+
+    const conversations = await Message.aggregate(pipeline);
 
     const stats = {
       total: await Message.countDocuments(),
       unread: await Message.countDocuments({ status: 'unread' }),
       read: await Message.countDocuments({ status: 'read' }),
-      replied: await Message.countDocuments({ status: 'replied' }),
+      totalUsers: conversations.length,
     };
 
     res.json({
       success: true,
-      messages,
+      conversations,
       stats,
     });
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to fetch messages',
+      message: error.message || 'Failed to fetch conversations',
     });
   }
 };
 
-// Get single message (admin only)
-export const getMessageById = async (req: Request, res: Response) => {
+// Get conversation with a specific user (admin only)
+export const getUserConversation = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { userId } = req.params;
 
-    const message = await Message.findById(id).populate('user', 'name email phone address');
+    const messages = await Message.find({ user: userId })
+      .populate('user', 'name email phone')
+      .populate('sentBy', 'name')
+      .sort({ createdAt: 1 });
 
-    if (!message) {
+    if (messages.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'Message not found',
+        message: 'No messages found for this user',
       });
     }
 
-    // Mark as read if it was unread
-    if (message.status === 'unread') {
-      message.status = 'read';
-      await message.save();
-    }
+    // Mark unread user messages as read
+    await Message.updateMany(
+      { user: userId, status: 'unread', isFromAdmin: false },
+      { status: 'read' }
+    );
 
     res.json({
       success: true,
-      message,
+      messages,
+      user: messages[0]?.user,
     });
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to fetch message',
+      message: error.message || 'Failed to fetch conversation',
     });
   }
 };
 
-// Update message status (admin only)
-export const updateMessageStatus = async (req: Request, res: Response) => {
+// Get messages for current user (authenticated users)
+export const getUserMessages = async (req: AuthRequest, res: Response) => {
   try {
-    const { id } = req.params;
-    const { status } = req.body;
+    const messages = await Message.find({ user: req.user?._id })
+      .populate('sentBy', 'name')
+      .sort({ createdAt: 1 });
 
-    if (!['unread', 'read', 'replied'].includes(status)) {
+    res.json({
+      success: true,
+      data: messages,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to fetch your messages',
+    });
+  }
+};
+
+// Send message to user from admin (admin only)
+export const sendMessageToUser = async (req: AuthRequest, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const { message } = req.body;
+
+    if (!message || !message.trim()) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid status value',
+        message: 'Message content is required'
       });
     }
 
-    const message = await Message.findByIdAndUpdate(
-      id,
-      { status },
-      { new: true }
-    ).populate('user', 'name email phone');
+    // Get user details
+    const User = require('../models/User').default;
+    const user = await User.findById(userId);
 
-    if (!message) {
+    if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'Message not found',
+        message: 'User not found',
       });
     }
 
-    res.json({
+    // Create a new message from admin to user
+    const newMessage = await Message.create({
+      user: userId,
+      name: user.name,
+      email: user.email,
+      message: message.trim(),
+      isFromAdmin: true,
+      sentBy: req.user?._id,
+      status: 'read',
+    });
+
+    const populatedMessage = await Message.findById(newMessage._id)
+      .populate('user', 'name email phone')
+      .populate('sentBy', 'name');
+
+    res.status(201).json({
       success: true,
-      message: 'Message status updated',
-      data: message,
+      message: 'Message sent successfully',
+      data: populatedMessage,
     });
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to update message status',
+      message: error.message || 'Failed to send message',
     });
   }
 };
@@ -166,23 +251,6 @@ export const deleteMessage = async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to delete message',
-    });
-  }
-};
-
-// Get messages by current user (authenticated users)
-export const getUserMessages = async (req: AuthRequest, res: Response) => {
-  try {
-    const messages = await Message.find({ user: req.user?._id }).sort({ createdAt: -1 });
-
-    res.json({
-      success: true,
-      messages,
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: error.message || 'Failed to fetch your messages',
     });
   }
 };
