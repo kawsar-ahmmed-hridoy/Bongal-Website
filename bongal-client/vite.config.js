@@ -7,14 +7,11 @@ export default defineConfig({
       babel: {
         plugins: [['babel-plugin-react-compiler']],
       },
-      server: {
-        host: true
-      },
     }),
   ],
-<<<<<<< HEAD
   server: {
     port: 3000,
+    host: true,
     proxy: {
       '/api': {
         target: 'http://localhost:5000',
@@ -39,6 +36,4 @@ export default defineConfig({
       },
     },
   },
-=======
->>>>>>> dd8d27df6b713991ee35934229cc3a42c63bf166
 })
