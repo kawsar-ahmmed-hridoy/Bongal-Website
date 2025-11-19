@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import { useState} from 'react';
-=======
 import { useState, useEffect, useRef } from 'react';
->>>>>>> f86040d314faa77b14b0bf014338a3a952d92a19
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { User, MessageCircle, Filter, Search, Check, AlertCircle, Send, ArrowLeft, Eye } from 'lucide-react';
 import { messageService } from '../../services/messageService';
