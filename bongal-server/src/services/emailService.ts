@@ -1,41 +1,35 @@
-import nodemailer from 'nodemailer';
+const { TransactionalEmailsApi, TransactionalEmailsApiApiKeys, SendSmtpEmail } = require('@getbrevo/brevo');
 
 export class EmailService {
-  private transporter: nodemailer.Transporter;
+  private apiInstance: any;
+  private fromEmail: string;
+  private fromName: string;
 
   constructor() {
-    const emailPassword = process.env.EMAIL_PASSWORD?.replace(/\s/g, '') || '';
+    // Initialize Brevo API
+    this.apiInstance = new TransactionalEmailsApi();
+    this.apiInstance.setApiKey(TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY || '');
 
-    this.transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
-      port: Number(process.env.EMAIL_PORT) || 587,
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: emailPassword,
-      },
-      tls: {
-        rejectUnauthorized: false
-      }
-    });
+    this.fromEmail = process.env.EMAIL_FROM || 'bongal848@gmail.com';
+    this.fromName = 'বঙ্গাল';
   }
 
   async sendEmail(to: string, subject: string, html: string) {
     try {
-      const info = await this.transporter.sendMail({
-        from: `"বঙ্গাল ~ ঐতিহ্যের সাথে বর্তমান" <${process.env.EMAIL_USER}>`,
-        to,
-        subject,
-        html,
-      });
+      const sendSmtpEmail = new SendSmtpEmail();
+      sendSmtpEmail.sender = { name: this.fromName, email: this.fromEmail };
+      sendSmtpEmail.to = [{ email: to }];
+      sendSmtpEmail.subject = subject;
+      sendSmtpEmail.htmlContent = html;
+      sendSmtpEmail.replyTo = { email: 'bongal848@gmail.com' };
 
-      return info;
+      const data = await this.apiInstance.sendTransacEmail(sendSmtpEmail);
+      return data;
     } catch (error: any) {
+      console.error('Email send error:', error);
       throw new Error(`Failed to send email: ${error.message}`);
     }
-  }
-
-  async sendVerificationEmail(email: string, verificationCode: string) {
+  } async sendVerificationEmail(email: string, verificationCode: string) {
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h1>Use the verification code below to access your বঙ্গাল account. Thank you! </h1>
