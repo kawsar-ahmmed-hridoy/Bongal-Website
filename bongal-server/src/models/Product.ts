@@ -45,7 +45,7 @@ const productSchema = new Schema<IProduct>(
     category: {
       type: String,
       required: [true, 'Please provide category'],
-      enum: ['honey', 'rice', 'vegetables', 'oil', 'handicraft', 'spices', 'dairy'],
+      enum: ['honey', 'rice', 'vegetables', 'oil', 'handicraft', 'spices', 'dairy','Molasses','Others'],
     },
     images: {
       type: [String],
