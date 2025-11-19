@@ -1,35 +1,35 @@
-import { Resend } from 'resend';
+const { TransactionalEmailsApi, TransactionalEmailsApiApiKeys, SendSmtpEmail } = require('@getbrevo/brevo');
 
 export class EmailService {
-  private resend: Resend;
+  private apiInstance: any;
   private fromEmail: string;
+  private fromName: string;
 
   constructor() {
-    // Initialize Resend with API key
-    this.resend = new Resend(process.env.RESEND_API_KEY || '');
+    // Initialize Brevo API
+    this.apiInstance = new TransactionalEmailsApi();
+    this.apiInstance.setApiKey(TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY || '');
 
-    // Use custom domain email or fallback to Resend's onboarding email
-    this.fromEmail = process.env.EMAIL_FROM || 'onboarding@resend.dev';
+    this.fromEmail = process.env.EMAIL_FROM || 'bongal848@gmail.com';
+    this.fromName = 'বঙ্গাল';
   }
 
   async sendEmail(to: string, subject: string, html: string) {
     try {
-      const data = await this.resend.emails.send({
-        from: this.fromEmail,
-        to,
-        subject,
-        html,
-        replyTo: 'bongal848@gmail.com', // Replies go to your Gmail
-      });
+      const sendSmtpEmail = new SendSmtpEmail();
+      sendSmtpEmail.sender = { name: this.fromName, email: this.fromEmail };
+      sendSmtpEmail.to = [{ email: to }];
+      sendSmtpEmail.subject = subject;
+      sendSmtpEmail.htmlContent = html;
+      sendSmtpEmail.replyTo = { email: 'bongal848@gmail.com' };
 
+      const data = await this.apiInstance.sendTransacEmail(sendSmtpEmail);
       return data;
     } catch (error: any) {
       console.error('Email send error:', error);
       throw new Error(`Failed to send email: ${error.message}`);
     }
-  }
-
-  async sendVerificationEmail(email: string, verificationCode: string) {
+  } async sendVerificationEmail(email: string, verificationCode: string) {
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h1>Use the verification code below to access your বঙ্গাল account. Thank you! </h1>

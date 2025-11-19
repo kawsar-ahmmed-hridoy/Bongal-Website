@@ -29,9 +29,14 @@ export const register = async (req: Request, res: Response) => {
     });
 
     // Send verification email in background (don't wait)
-    emailService.sendVerificationEmail(user.email, verificationCode).catch(error => {
-      console.error('Failed to send verification email:', error);
-    });
+    console.log('📧 Attempting to send verification email to:', user.email);
+    emailService.sendVerificationEmail(user.email, verificationCode)
+      .then(() => {
+        console.log('✅ Verification email sent successfully to:', user.email);
+      })
+      .catch(error => {
+        console.error('❌ Failed to send verification email:', error);
+      });
 
     // Respond immediately
     res.status(201).json({
