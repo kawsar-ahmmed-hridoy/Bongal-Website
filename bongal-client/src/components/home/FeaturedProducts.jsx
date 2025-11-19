@@ -9,18 +9,12 @@ const FeaturedProducts = () => {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['featured-products', { limit: 6, isFeatured: true }],
     queryFn: () => productService.getAllProducts({ limit: 6, isFeatured: true }),
-    retry: 1,
-    onError: (error) => {
-      console.error('Error fetching featured products:', error);
-    }
+    retry: 1
   });
-
-  console.log('FeaturedProducts rendering - isLoading:', isLoading, 'error:', error, 'data:', data);
 
   if (isLoading) return <Loader />;
 
   if (error) {
-    console.error('Featured products error:', error);
     return (
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">

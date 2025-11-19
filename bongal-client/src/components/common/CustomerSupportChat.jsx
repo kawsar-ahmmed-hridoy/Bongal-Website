@@ -26,7 +26,6 @@ const CustomerSupportChat = () => {
     }, 0);
   };
 
-  // Scroll to bottom only on initial load
   useEffect(() => {
     if (isInitialLoad && messages.length > 0) {
       scrollToBottom('auto');
@@ -34,25 +33,21 @@ const CustomerSupportChat = () => {
     }
   }, [messages, isInitialLoad]);
 
-  // Fetch user's message history when chat opens and user is logged in
   useEffect(() => {
     if (isOpen && user) {
       setIsInitialLoad(true);
       fetchMessages();
 
-      // Start polling for new messages every 5 seconds
       pollingIntervalRef.current = setInterval(() => {
         fetchMessages();
       }, 5000);
     } else {
-      // Clear polling when chat is closed
       if (pollingIntervalRef.current) {
         clearInterval(pollingIntervalRef.current);
         pollingIntervalRef.current = null;
       }
     }
 
-    // Cleanup on unmount
     return () => {
       if (pollingIntervalRef.current) {
         clearInterval(pollingIntervalRef.current);
@@ -65,9 +60,7 @@ const CustomerSupportChat = () => {
       const response = await messageService.getMyMessages();
       const messageHistory = response.data || [];
 
-      // Only update if message count changed (prevents flicker)
       if (messageHistory.length !== lastMessageCountRef.current) {
-        // Convert messages to chat format
         const formattedMessages = messageHistory.map(msg => ({
           text: msg.message,
           sender: msg.isFromAdmin ? 'admin' : 'user',
@@ -81,7 +74,6 @@ const CustomerSupportChat = () => {
         lastMessageCountRef.current = messageHistory.length;
       }
     } catch (error) {
-      console.error('Failed to fetch messages:', error);
     }
   };
 
@@ -104,7 +96,6 @@ const CustomerSupportChat = () => {
     try {
       const response = await messageService.sendMessage(formData);
 
-      // Add message to local state for immediate feedback
       const newMessage = {
         text: formData.message,
         sender: 'user',
@@ -115,7 +106,6 @@ const CustomerSupportChat = () => {
 
       setMessages(prev => [...prev, newMessage]);
 
-      // Reset form
       setFormData({
         message: ''
       });
@@ -135,7 +125,6 @@ const CustomerSupportChat = () => {
 
   return (
     <>
-      {/* Floating Chat Button */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
@@ -147,19 +136,16 @@ const CustomerSupportChat = () => {
             !
           </span>
 
-          {/* Tooltip */}
           <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
             Need help? Chat with us!
           </div>
         </button>
       )}
 
-      {/* Chat Window */}
       {isOpen && (
         <div
           className="fixed bottom-6 right-6 z-50 bg-white rounded-3xl shadow-2xl transition-all duration-300 w-96 h-[600px] flex flex-col overflow-hidden border-2 border-primary-100"
         >
-          {/* Header */}
           <div className="bg-gradient-to-r from-primary-800 to-primary-600 text-white p-4 flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
@@ -177,12 +163,10 @@ const CustomerSupportChat = () => {
               <X size={18} />
             </button>
           </div>
-          {/* Chat Messages Area */}
           <div
             ref={messagesContainerRef}
             className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50"
           >
-            {/* Welcome Message */}
             {messages.length === 0 && (
               <div className="flex items-start space-x-2">
                 <div className="w-8 h-8 bg-primary-800 rounded-full flex items-center justify-center flex-shrink-0">
@@ -197,13 +181,11 @@ const CustomerSupportChat = () => {
               </div>
             )}
 
-            {/* User Messages */}
             {messages.length > 0 && (
               messages.map((msg, index) => {
                 const showDate = index === 0 || msg.date !== messages[index - 1]?.date;
                 return (
                   <div key={`${msg.sender}-${index}`}>
-                    {/* Date Separator */}
                     {showDate && msg.date && (
                       <div className="flex items-center justify-center my-4">
                         <div className="bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full">
@@ -212,7 +194,6 @@ const CustomerSupportChat = () => {
                       </div>
                     )}
 
-                    {/* Message */}
                     <div className={`flex items-start space-x-2 ${msg.sender === 'user' ? 'justify-end' : ''}`}>
                       {msg.sender === 'admin' && (
                         <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
@@ -266,7 +247,6 @@ const CustomerSupportChat = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input Area */}
           <div className="p-4 bg-white border-t border-gray-200">
             {!user ? (
               <div className="text-center py-4">

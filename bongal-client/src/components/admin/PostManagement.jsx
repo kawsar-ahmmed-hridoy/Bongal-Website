@@ -118,7 +118,6 @@ const PostManagement = () => {
           </button>
         </div>
 
-        {/* Status Filter */}
         <div className="flex space-x-2">
           {['pending', 'approved', 'rejected'].map((status) => (
             <button
@@ -135,7 +134,6 @@ const PostManagement = () => {
         </div>
       </div>
 
-      {/* Category Management Modal */}
       {showCategoryModal && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
@@ -150,7 +148,6 @@ const PostManagement = () => {
                 </button>
               </div>
 
-              {/* Create Category Form */}
               <form onSubmit={handleCreateCategory} className="mb-6">
                 <div className="flex space-x-2">
                   <input
@@ -171,7 +168,6 @@ const PostManagement = () => {
                 </div>
               </form>
 
-              {/* Categories List */}
               <div className="space-y-2">
                 <h4 className="font-semibold text-gray-700 mb-3">Existing Categories</h4>
                 {categories.length === 0 ? (
@@ -202,7 +198,6 @@ const PostManagement = () => {
         </div>
       )}
 
-      {/* Posts List */}
       <div className="space-y-4">
         {posts.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
@@ -216,7 +211,6 @@ const PostManagement = () => {
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  {/* Author Info */}
                   <div className="flex items-center space-x-3 mb-3">
                     <div className="w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center text-white font-semibold">
                       {post.author?.name?.charAt(0).toUpperCase()}
@@ -227,7 +221,6 @@ const PostManagement = () => {
                     </div>
                   </div>
 
-                  {/* Post Details */}
                   <div className="mb-3">
                     <div className="flex items-center space-x-2 mb-2">
                       <span className="px-2 py-1 bg-primary-100 text-primary-700 rounded-lg text-xs font-medium">
@@ -246,7 +239,6 @@ const PostManagement = () => {
                     <p className="text-gray-800 line-clamp-3">{post.content}</p>
                   </div>
 
-                  {/* Images Preview */}
                   {post.images && post.images.length > 0 && (
                     <div className="flex space-x-2 mb-3">
                       {post.images.map((image, index) => (
@@ -260,7 +252,6 @@ const PostManagement = () => {
                     </div>
                   )}
 
-                  {/* Stats */}
                   <div className="flex items-center space-x-4 text-sm text-gray-500">
                     <span>{post.likesCount || 0} likes</span>
                     <span>{post.commentsCount || 0} comments</span>
@@ -268,7 +259,6 @@ const PostManagement = () => {
                   </div>
                 </div>
 
-                {/* Actions */}
                 <div className="flex flex-col space-y-2 ml-4">
                   {post.status === 'pending' && (
                     <>

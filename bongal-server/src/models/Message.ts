@@ -53,7 +53,6 @@ const messageSchema = new Schema<IMessage>(
   }
 );
 
-// Index for efficient queries
 messageSchema.index({ user: 1, createdAt: -1 });
 messageSchema.index({ status: 1 });
 

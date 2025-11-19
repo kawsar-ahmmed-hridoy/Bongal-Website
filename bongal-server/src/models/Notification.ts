@@ -54,7 +54,6 @@ const notificationSchema = new Schema<INotification>(
   }
 );
 
-// Index for better query performance
 notificationSchema.index({ recipient: 1, read: 1, createdAt: -1 });
 
 const Notification = mongoose.model<INotification>('Notification', notificationSchema);

@@ -10,7 +10,6 @@ import {
 
 const router = express.Router();
 
-// All notification routes require authentication
 router.use(protect);
 
 router.get('/', getNotifications);

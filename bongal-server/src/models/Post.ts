@@ -69,7 +69,6 @@ const postSchema = new Schema<IPost>(
   }
 );
 
-// Index for better query performance
 postSchema.index({ status: 1, createdAt: -1 });
 postSchema.index({ category: 1, status: 1 });
 postSchema.index({ author: 1 });

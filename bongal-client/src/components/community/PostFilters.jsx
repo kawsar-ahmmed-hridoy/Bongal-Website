@@ -14,7 +14,6 @@ const PostFilters = ({ categories, currentFilters, onFilterChange }) => {
         <h3 className="font-bold text-gray-900">Filters</h3>
       </div>
 
-      {/* Category Filter */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Category
@@ -32,7 +31,6 @@ const PostFilters = ({ categories, currentFilters, onFilterChange }) => {
         </select>
       </div>
 
-      {/* Sort By Filter */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Sort By
@@ -43,8 +41,8 @@ const PostFilters = ({ categories, currentFilters, onFilterChange }) => {
               key={option.value}
               onClick={() => onFilterChange({ sortBy: option.value })}
               className={`w-full text-left px-4 py-2 rounded-lg transition-all ${currentFilters.sortBy === option.value
-                  ? 'bg-primary-600 text-white font-medium'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-primary-600 text-white font-medium'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
             >
               {option.label}

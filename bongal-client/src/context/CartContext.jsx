@@ -12,23 +12,19 @@ export const useCart = () => {
 };
 
 export const CartProvider = ({ children }) => {
-  // Initialize cart from localStorage
   const [cart, setCart] = useState(() => {
     try {
       const savedCart = localStorage.getItem('cart');
       return savedCart ? JSON.parse(savedCart) : [];
     } catch (error) {
-      console.error('Error loading cart from localStorage:', error);
       return [];
     }
   });
 
-  // Save to localStorage whenever cart changes
   useEffect(() => {
     try {
       localStorage.setItem('cart', JSON.stringify(cart));
     } catch (error) {
-      console.error('Error saving cart to localStorage:', error);
     }
   }, [cart]);
 
@@ -43,7 +39,6 @@ export const CartProvider = ({ children }) => {
             : item
         );
       }
-      // Ensure the product has both id and _id for consistency
       return [...prevCart, { ...product, id: productId, _id: productId, quantity }];
     });
   };

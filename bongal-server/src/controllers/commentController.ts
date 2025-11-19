@@ -4,7 +4,6 @@ import Post from '../models/Post';
 import Notification from '../models/Notification';
 import { AuthRequest } from '../middleware/auth';
 
-// Create a comment on a post
 export const createComment = async (req: AuthRequest, res: Response) => {
   try {
     const { content } = req.body;
@@ -24,11 +23,9 @@ export const createComment = async (req: AuthRequest, res: Response) => {
       content: content.trim()
     });
 
-    // Update post comments count
     post.commentsCount += 1;
     await post.save();
 
-    // Create notification for post author (if not commenting on own post)
     if (post.author.toString() !== req.user._id.toString()) {
       await Notification.create({
         recipient: post.author,
@@ -58,7 +55,6 @@ export const createComment = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Get comments for a post
 export const getComments = async (req: AuthRequest, res: Response) => {
   try {
     const postId = req.params.postId;
@@ -93,7 +89,6 @@ export const getComments = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Delete own comment
 export const deleteComment = async (req: AuthRequest, res: Response) => {
   try {
     const comment = await Comment.findById(req.params.id);
@@ -105,7 +100,6 @@ export const deleteComment = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Check if user is the author
     if (comment.author.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
@@ -113,7 +107,6 @@ export const deleteComment = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Update post comments count
     await Post.findByIdAndUpdate(comment.post, {
       $inc: { commentsCount: -1 }
     });

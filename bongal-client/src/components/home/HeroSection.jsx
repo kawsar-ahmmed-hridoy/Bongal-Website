@@ -14,10 +14,10 @@ const HeroSection = () => {
           <div className="space-y-8">
 
             <div className="space-y-4">
-              <h1 className="text-6xl md:text-7xl font-bold text-gray-900 leading-none tracking-tight">
+              <h1 className="text-6xl md:text-7xl font-bold text-gray-900 leading-none tracking-tight bengali-text">
                 বঙ্গাল
               </h1>
-              <p className="text-2xl md:text-3xl text-gray-600 font-light leading-relaxed">
+              <p className="text-2xl md:text-3xl text-gray-600 font-light leading-relaxed bengali-text">
                 ঐতিহ্যের সাথে বর্তমান
                 <br />
                 <span className="text-lg text-gray-500 mt-2 block">
@@ -26,9 +26,10 @@ const HeroSection = () => {
               </p>
             </div>
 
-            <p className="text-xl text-gray-500 leading-relaxed max-w-2xl">
-              Experience the purity of rural Bangladesh with carefully curated products
-              from local artisans and farmers, bringing traditional craftsmanship to modern living.
+            <p className="text-xl text-gray-500 leading-relaxed max-w-2xl bengali-text">
+              দেশীয় খাবারের প্রকৃত স্বাদ ছড়িয়ে দিতে বঙ্গালের যাত্রা। বঙ্গাল শুধু খাবারের বিশুদ্ধতাই নিশ্চিত করে না বরং এর সাথে মিশে থাকে দেশের প্রান্তিক অঞ্চলের মাটি ও মানুষের গল্প। যা আপনাকে যুক্ত করে দেয় নিজের শিকড়ের সাথে।
+
+              একাবিংশ শতাব্দীর এই যুগে আমরা যেসব খাবার খাই তা বেশিরভাগই রাসায়নিক কৃষির সাথে সম্পর্কযুক্ত। রাসায়নিক ও ভেজালযুক্ত খাবারের এই স্রোতের বিপরীতে বিশুদ্ধতার সাথে বঙ্গালের যে যাত্রা অব্যাহত, সে যাত্রার সঙ্গী হোন আপনিও।
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
@@ -48,9 +49,9 @@ const HeroSection = () => {
                     <Package className="text-gray-700" size={20} />
                   </div>
                 </div>
-                <p className="text-2xl font-semibold text-gray-900 mb-1">১০০+</p>
+                <p className="text-2xl font-semibold text-gray-900 mb-1 bengali-text">১০০+</p>
                 <p className="text-sm text-gray-600 font-medium">Products</p>
-                <p className="text-xs text-gray-500 mt-1">পণ্য</p>
+                <p className="text-xs text-gray-500 mt-1 bengali-text">পণ্য</p>
               </div>
 
               <div className="text-center group hover:scale-105 transition-transform duration-300">
@@ -59,9 +60,9 @@ const HeroSection = () => {
                     <Users className="text-gray-700" size={20} />
                   </div>
                 </div>
-                <p className="text-2xl font-semibold text-gray-900 mb-1">৫০০+</p>
+                <p className="text-2xl font-semibold text-gray-900 mb-1 bengali-text">৫০০+</p>
                 <p className="text-sm text-gray-600 font-medium">Customers</p>
-                <p className="text-xs text-gray-500 mt-1">গ্রাহক</p>
+                <p className="text-xs text-gray-500 mt-1 bengali-text">গ্রাহক</p>
               </div>
 
               <div className="text-center group hover:scale-105 transition-transform duration-300">
@@ -70,9 +71,9 @@ const HeroSection = () => {
                     <MapPin className="text-gray-700" size={20} />
                   </div>
                 </div>
-                <p className="text-2xl font-semibold text-gray-900 mb-1">২০+</p>
+                <p className="text-2xl font-semibold text-gray-900 mb-1 bengali-text">২০+</p>
                 <p className="text-sm text-gray-600 font-medium">Villages</p>
-                <p className="text-xs text-gray-500 mt-1">গ্রাম</p>
+                <p className="text-xs text-gray-500 mt-1 bengali-text">গ্রাম</p>
               </div>
 
               <div className="text-center group hover:scale-105 transition-transform duration-300">
@@ -81,9 +82,9 @@ const HeroSection = () => {
                     <Award className="text-gray-700" size={20} />
                   </div>
                 </div>
-                <p className="text-2xl font-semibold text-gray-900 mb-1">১০০%</p>
+                <p className="text-2xl font-semibold text-gray-900 mb-1 bengali-text">১০০%</p>
                 <p className="text-sm text-gray-600 font-medium">Authentic</p>
-                <p className="text-xs text-gray-500 mt-1">খাঁটি</p>
+                <p className="text-xs text-gray-500 mt-1 bengali-text">খাঁটি</p>
               </div>
             </div>
           </div>

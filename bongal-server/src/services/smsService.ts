@@ -1,6 +1,5 @@
 export class SMSService {
   async sendSMS(phone: string, message: string) {
-    console.log(`Sending SMS to ${phone}: ${message}`);
     return { success: true, message: 'SMS sent successfully' };
   }
 

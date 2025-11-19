@@ -26,15 +26,6 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Request logger for debugging
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
-  if (req.method === 'POST') {
-    console.log('Body:', JSON.stringify(req.body, null, 2));
-  }
-  next();
-});
-
 app.get('/api', (req: Request, res: Response) => {
   res.json({
     message: 'বঙ্গাল API is running',

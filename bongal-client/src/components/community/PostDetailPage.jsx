@@ -45,7 +45,6 @@ const PostDetailPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 py-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Back Button */}
         <button
           onClick={() => navigate('/community')}
           className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
@@ -54,7 +53,6 @@ const PostDetailPage = () => {
           <span>Back to Community</span>
         </button>
 
-        {/* Post */}
         {post && <PostCard post={post} />}
       </div>
     </div>

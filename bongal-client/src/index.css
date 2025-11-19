@@ -15,5 +15,6 @@ body {
 
 /* Bengali text styling */
 .bengali-text {
-  font-family: 'Noto Sans Bengali', sans-serif;
+  font-family: 'Baloo Da 2', cursive, sans-serif;
+  font-weight: 500;
 }
