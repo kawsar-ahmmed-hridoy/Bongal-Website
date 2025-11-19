@@ -1,36 +1,30 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 export class EmailService {
-  private transporter: nodemailer.Transporter;
+  private resend: Resend;
+  private fromEmail: string;
 
   constructor() {
-    const emailPassword = process.env.EMAIL_PASSWORD?.replace(/\s/g, '') || '';
+    // Initialize Resend with API key
+    this.resend = new Resend(process.env.RESEND_API_KEY || '');
 
-    this.transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
-      port: Number(process.env.EMAIL_PORT) || 587,
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: emailPassword,
-      },
-      tls: {
-        rejectUnauthorized: false
-      }
-    });
+    // Use custom domain email or fallback to Resend's onboarding email
+    this.fromEmail = process.env.EMAIL_FROM || 'onboarding@resend.dev';
   }
 
   async sendEmail(to: string, subject: string, html: string) {
     try {
-      const info = await this.transporter.sendMail({
-        from: `"বঙ্গাল ~ ঐতিহ্যের সাথে বর্তমান" <${process.env.EMAIL_USER}>`,
+      const data = await this.resend.emails.send({
+        from: this.fromEmail,
         to,
         subject,
         html,
+        replyTo: 'bongal848@gmail.com', // Replies go to your Gmail
       });
 
-      return info;
+      return data;
     } catch (error: any) {
+      console.error('Email send error:', error);
       throw new Error(`Failed to send email: ${error.message}`);
     }
   }

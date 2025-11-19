@@ -33,6 +33,7 @@
     "multer-storage-cloudinary": "^2.2.1",
     "nodemailer": "^7.0.10",
     "paypal-rest-sdk": "^1.8.1",
+    "resend": "^6.5.1",
     "stripe": "^19.3.0",
     "twilio": "^5.10.4",
     "uuid": "^13.0.0"
