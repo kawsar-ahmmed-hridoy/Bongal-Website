@@ -34,8 +34,7 @@ const Layout = () => {
         <Outlet />
       </main>
       <Footer />
-
-      {/* Floating Customer Support Chat */}
+      
       <CustomerSupportChat />
     </div>
   );

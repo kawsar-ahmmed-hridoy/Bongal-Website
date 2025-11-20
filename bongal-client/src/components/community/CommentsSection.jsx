@@ -12,21 +12,18 @@ const CommentsSection = ({ postId, onCommentAdded, onCommentDeleted }) => {
   const queryClient = useQueryClient();
   const [newComment, setNewComment] = useState('');
 
-  // Fetch comments
   const { data: commentsData, isLoading } = useQuery({
     queryKey: ['comments', postId],
     queryFn: () => commentService.getComments(postId),
-    staleTime: 0, // Comments can go stale immediately
-    refetchOnWindowFocus: false // Don't refetch when window gains focus
+    staleTime: 0,
+    refetchOnWindowFocus: false
   });
 
-  // Create comment mutation
   const createCommentMutation = useMutation({
     mutationFn: (content) => commentService.createComment(postId, content),
     onSuccess: () => {
       setNewComment('');
       queryClient.invalidateQueries(['comments', postId]);
-      // Call callback to update parent's comment count
       if (onCommentAdded) {
         onCommentAdded();
       }
@@ -37,12 +34,10 @@ const CommentsSection = ({ postId, onCommentAdded, onCommentDeleted }) => {
     }
   });
 
-  // Delete comment mutation
   const deleteCommentMutation = useMutation({
     mutationFn: (commentId) => commentService.deleteComment(commentId),
     onSuccess: () => {
       queryClient.invalidateQueries(['comments', postId]);
-      // Call callback to update parent's comment count
       if (onCommentDeleted) {
         onCommentDeleted();
       }

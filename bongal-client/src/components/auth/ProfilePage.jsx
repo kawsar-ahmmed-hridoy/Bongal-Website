@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Mail, Phone, MapPin, Camera, Save, Edit, Shield, Calendar, CheckCircle, XCircle, Package, ShoppingBag, Settings } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Camera, Save, Edit, Shield, Calendar, CheckCircle, XCircle, Package, ShoppingBag, Settings, Sparkles } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { authService } from '../../services/authService';
 import toast from 'react-hot-toast';
@@ -10,6 +10,7 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -23,7 +24,16 @@ const ProfilePage = () => {
   const [sendingCode, setSendingCode] = useState(false);
   const [verifyingCode, setVerifyingCode] = useState(false);
 
+  const colors = {
+    darkBlue: '#011D4D',
+    mediumBlue: '#034078',
+    teal: '#1282A2',
+    cream: '#E4DFDA',
+    brown: '#63372C'
+  };
+
   useEffect(() => {
+    setIsVisible(true);
     if (user) {
       setFormData({
         name: user.name || '',
@@ -52,8 +62,10 @@ const ProfilePage = () => {
       await updateProfile(formData);
       setMessage({ type: 'success', text: 'Profile updated successfully!' });
       setIsEditing(false);
+      toast.success('Profile updated successfully!');
     } catch (error) {
       setMessage({ type: 'error', text: error.message || 'Failed to update profile' });
+      toast.error(error.message || 'Failed to update profile');
     } finally {
       setIsLoading(false);
     }
@@ -110,7 +122,7 @@ const ProfilePage = () => {
       toast.success('Email verified successfully!');
       setShowVerification(false);
       setVerificationCode('');
-      window.location.reload(); // Reload to update user state
+      window.location.reload();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Invalid or expired code');
     } finally {
@@ -124,63 +136,165 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 max-w-4xl">
+    <div 
+      className="min-h-screen py-8 transition-all duration-500"
+      style={{ backgroundColor: colors.cream }}
+    >
+      <div className="absolute inset-0 overflow-hidden">
+        {[...Array(10)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full animate-float-slow"
+            style={{
+              width: `${8 + i % 4 * 4}px`,
+              height: `${8 + i % 4 * 4}px`,
+              background: `radial-gradient(circle, ${colors.teal}15, ${colors.mediumBlue}10)`,
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${i * 0.4}s`,
+              animationDuration: `${10 + i * 2}s`
+            }}
+          />
+        ))}
+      </div>
 
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Profile</h1>
-          <p className="text-gray-600 mt-3 text-lg font-light">Manage your account information and preferences</p>
+      <div className="container mx-auto px-4 max-w-4xl relative z-10">
+        <div className={`mb-8 transition-all duration-700 delay-200 ${
+          isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+        }`}>
+          <h1 
+            className="text-4xl font-bold tracking-tight transition-all duration-500"
+            style={{ color: colors.darkBlue }}
+          >
+            Profile
+          </h1>
+          <p 
+            className="mt-3 text-lg font-light transition-all duration-500"
+            style={{ color: colors.mediumBlue }}
+          >
+            Manage your account information and preferences
+          </p>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-200/60 overflow-hidden">
-
-          <div className="bg-gray-900 p-5 text-white">
+        <div 
+          className="rounded-3xl border overflow-hidden backdrop-blur-sm transition-all duration-500 transform hover:scale-105"
+          style={{
+            backgroundColor: `${colors.cream}f8`,
+            borderColor: `${colors.mediumBlue}20`,
+            boxShadow: '0 20px 60px rgba(0,0,0,0.1)'
+          }}
+        >
+          <div 
+            className="p-5 text-white transition-all duration-500"
+            style={{ 
+              background: `linear-gradient(135deg, ${colors.darkBlue}, ${colors.mediumBlue})`
+            }}
+          >
             <div className="flex items-center space-x-6">
-              <div className="relative">
+              <div className="relative group">
                 {user.avatar ? (
                   <img
                     src={user.avatar}
                     alt={user.name || 'User Avatar'}
-                    className="w-24 h-24 rounded-2xl object-cover border-2 border-white"
+                    className="w-24 h-24 rounded-2xl object-cover border-2 border-white transition-all duration-500 group-hover:scale-110"
                   />
                 ) : (
-                  <div className="w-24 h-24 bg-white text-gray-500 rounded-2xl flex items-center justify-center text-2xl font-bold border-4 border-white/20">
+                  <div 
+                    className="w-24 h-24 rounded-2xl flex items-center justify-center text-2xl font-bold border-4 transition-all duration-500 group-hover:scale-110"
+                    style={{ 
+                      backgroundColor: `${colors.cream}20`,
+                      color: colors.cream,
+                      borderColor: `${colors.cream}40`
+                    }}
+                  >
                     {getUserInitials()}
                   </div>
                 )}
                 {isEditing && (
-                  <button className="absolute -bottom-2 -right-2 bg-gray-800 rounded-xl p-2 hover:bg-gray-700 transition-all duration-300 border border-gray-600">
-                    <Camera size={18} className="text-white" />
+                  <button 
+                    className="absolute -bottom-2 -right-2 rounded-xl p-2 transition-all duration-500 transform hover:scale-110 hover:rotate-12 border"
+                    style={{ 
+                      backgroundColor: colors.teal,
+                      borderColor: colors.cream,
+                      color: colors.cream
+                    }}
+                  >
+                    <Camera size={18} />
                   </button>
                 )}
               </div>
               <div className="flex-1">
                 <div className="flex items-center space-x-3">
-                  <h2 className="text-3xl font-bold tracking-tight">{user.name || 'No Name Provided'}</h2>
+                  <h2 
+                    className="text-3xl font-bold tracking-tight transition-all duration-500"
+                  >
+                    {user.name || 'No Name Provided'}
+                  </h2>
                   {user.isVerified ? (
-                    <div className="flex items-center bg-accent-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                    <div 
+                      className="flex items-center px-3 py-1 rounded-full text-sm font-semibold transition-all duration-500 transform hover:scale-105"
+                      style={{ 
+                        backgroundColor: colors.teal,
+                        color: colors.cream
+                      }}
+                    >
                       <CheckCircle size={16} className="mr-1" />
                       Verified
                     </div>
                   ) : (
-                    <div className="flex items-center bg-gray-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                    <div 
+                      className="flex items-center px-3 py-1 rounded-full text-sm font-semibold transition-all duration-500 transform hover:scale-105"
+                      style={{ 
+                        backgroundColor: `${colors.cream}40`,
+                        color: colors.cream
+                      }}
+                    >
                       <XCircle size={16} className="mr-1" />
                       Not Verified
                     </div>
                   )}
                 </div>
-                <p className="text-gray-300 text-lg font-light mt-1">{user.email || 'No Email Provided'}</p>
+                <p 
+                  className="text-lg font-light mt-1 transition-all duration-500"
+                  style={{ color: `${colors.cream}cc` }}
+                >
+                  {user.email || 'No Email Provided'}
+                </p>
                 {isAdmin && (
-                  <div className="flex items-center mt-3 text-gray-300">
+                  <div 
+                    className="flex items-center mt-3 transition-all duration-500"
+                    style={{ color: `${colors.cream}cc` }}
+                  >
                     <Shield size={18} className="mr-2" />
-                    <span className="text-sm font-medium bg-white/20 px-3 py-1 rounded-full">Administrator</span>
+                    <span 
+                      className="text-sm font-medium px-3 py-1 rounded-full transition-all duration-500 transform hover:scale-105"
+                      style={{ backgroundColor: `${colors.cream}20` }}
+                    >
+                      Administrator
+                    </span>
                   </div>
                 )}
                 {!user.isVerified && (
                   <button
                     onClick={handleSendVerificationCode}
                     disabled={sendingCode}
-                    className="mt-3 flex items-center bg-accent-600 hover:bg-accent-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors disabled:bg-gray-600"
+                    className="mt-3 flex items-center px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-500 transform hover:scale-105 disabled:opacity-50"
+                    style={{ 
+                      backgroundColor: colors.teal,
+                      color: colors.cream
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!sendingCode) {
+                        e.target.style.backgroundColor = colors.mediumBlue;
+                        e.target.style.transform = 'scale(1.05)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!sendingCode) {
+                        e.target.style.backgroundColor = colors.teal;
+                        e.target.style.transform = 'scale(1)';
+                      }
+                    }}
                   >
                     <Mail size={16} className="mr-2" />
                     {sendingCode ? 'Sending...' : 'Verify Email'}
@@ -190,12 +304,25 @@ const ProfilePage = () => {
             </div>
           </div>
 
-          {/* Verification Section */}
           {!user.isVerified && showVerification && (
-            <div className="border-t border-gray-200 p-6 bg-accent-50">
+            <div 
+              className="border-t p-6 transition-all duration-500 animate-in slide-in-from-top-5"
+              style={{ 
+                borderColor: `${colors.mediumBlue}20`,
+                backgroundColor: `${colors.teal}15`
+              }}
+            >
               <div className="max-w-md mx-auto">
-                <h3 className="text-lg font-bold text-gray-900 mb-3">Email Verification</h3>
-                <p className="text-sm text-gray-600 mb-4">
+                <h3 
+                  className="text-lg font-bold mb-3 transition-all duration-500"
+                  style={{ color: colors.darkBlue }}
+                >
+                  Email Verification
+                </h3>
+                <p 
+                  className="text-sm mb-4 transition-all duration-500"
+                  style={{ color: colors.mediumBlue }}
+                >
                   Enter the 6-digit code sent to <span className="font-semibold">{user.email}</span>
                 </p>
                 <form onSubmit={handleVerifyCode} className="space-y-3">
@@ -204,27 +331,70 @@ const ProfilePage = () => {
                     value={verificationCode}
                     onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                     placeholder="Enter 6-digit code"
-                    className="w-full px-4 py-3 border border-primary-300 rounded-2xl focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition-all text-center text-xl tracking-widest"
+                    className="w-full px-4 py-3 border-2 rounded-2xl focus:outline-none transition-all duration-500 text-center text-xl tracking-widest placeholder-opacity-70"
+                    style={{
+                      borderColor: `${colors.mediumBlue}30`,
+                      backgroundColor: colors.cream,
+                      color: colors.darkBlue,
+                      placeholderColor: `${colors.mediumBlue}70`
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = colors.teal;
+                      e.target.style.boxShadow = `0 8px 24px ${colors.teal}20`;
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = `${colors.mediumBlue}30`;
+                      e.target.style.boxShadow = 'none';
+                    }}
                     maxLength={6}
                   />
                   <div className="flex space-x-3">
                     <button
                       type="submit"
                       disabled={verifyingCode || verificationCode.length !== 6}
-                      className="flex-1 bg-primary-800 text-white py-3 rounded-2xl font-semibold hover:bg-primary-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                      className="flex-1 py-3 rounded-2xl font-semibold transition-all duration-500 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed border-2 shadow-lg"
+                      style={{
+                        backgroundColor: verifyingCode ? `${colors.mediumBlue}50` : colors.teal,
+                        color: colors.cream,
+                        borderColor: verifyingCode ? `${colors.mediumBlue}50` : colors.teal
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!verifyingCode && verificationCode.length === 6) {
+                          e.target.style.backgroundColor = colors.mediumBlue;
+                          e.target.style.borderColor = colors.mediumBlue;
+                          e.target.style.transform = 'scale(1.05)';
+                          e.target.style.boxShadow = `0 12px 32px ${colors.teal}40`;
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!verifyingCode && verificationCode.length === 6) {
+                          e.target.style.backgroundColor = colors.teal;
+                          e.target.style.borderColor = colors.teal;
+                          e.target.style.transform = 'scale(1)';
+                          e.target.style.boxShadow = '0 8px 24px rgba(0,0,0,0.2)';
+                        }
+                      }}
                     >
                       {verifyingCode ? 'Verifying...' : 'Verify'}
                     </button>
                     <button
                       type="button"
                       onClick={() => setShowVerification(false)}
-                      className="px-6 bg-gray-200 text-gray-700 py-3 rounded-2xl font-semibold hover:bg-gray-300 transition-colors"
+                      className="px-6 py-3 rounded-2xl font-semibold transition-all duration-500 transform hover:scale-105 border-2"
+                      style={{
+                        backgroundColor: `${colors.mediumBlue}15`,
+                        color: colors.darkBlue,
+                        borderColor: `${colors.mediumBlue}30`
+                      }}
                     >
                       Cancel
                     </button>
                   </div>
                 </form>
-                <p className="text-xs text-gray-500 mt-3 text-center">
+                <p 
+                  className="text-xs mt-3 text-center transition-all duration-500"
+                  style={{ color: colors.mediumBlue }}
+                >
                   Code expires in 15 minutes. Wait 5 minutes before requesting a new code.
                 </p>
               </div>
@@ -233,10 +403,13 @@ const ProfilePage = () => {
 
           <div className="p-8">
             {message.text && (
-              <div className={`mb-8 p-4 rounded-2xl ${message.type === 'success'
-                ? 'bg-green-50 text-green-800 border border-green-200'
-                : 'bg-red-50 text-red-800 border border-red-200'
-                }`}>
+              <div 
+                className={`mb-8 p-4 rounded-2xl border transition-all duration-500 transform hover:scale-105 ${
+                  message.type === 'success'
+                    ? 'bg-green-50 text-green-800 border-green-200'
+                    : 'bg-red-50 text-red-800 border-red-200'
+                }`}
+              >
                 <div className="flex items-center">
                   {message.type === 'success' ? (
                     <CheckCircle size={20} className="mr-3" />
@@ -250,10 +423,15 @@ const ProfilePage = () => {
 
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-
-                <div className="space-y-3">
-                  <label className="flex items-center text-sm font-semibold text-gray-700">
-                    <User size={18} className="mr-3 text-gray-500" />
+                {/* Name Field */}
+                <div className={`space-y-3 transition-all duration-700 delay-100 ${
+                  isVisible ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'
+                }`}>
+                  <label 
+                    className="flex items-center text-sm font-semibold transition-all duration-500"
+                    style={{ color: colors.darkBlue }}
+                  >
+                    <User size={18} className="mr-3" style={{ color: colors.teal }} />
                     Full Name
                   </label>
                   {isEditing ? (
@@ -262,29 +440,67 @@ const ProfilePage = () => {
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300 bg-white text-gray-900"
+                      className="w-full px-4 py-3 border-2 rounded-2xl focus:outline-none transition-all duration-500 placeholder-opacity-70"
+                      style={{
+                        borderColor: `${colors.mediumBlue}30`,
+                        backgroundColor: colors.cream,
+                        color: colors.darkBlue,
+                        placeholderColor: `${colors.mediumBlue}70`
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = colors.teal;
+                        e.target.style.boxShadow = `0 8px 24px ${colors.teal}20`;
+                        e.target.style.transform = 'scale(1.02)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = `${colors.mediumBlue}30`;
+                        e.target.style.boxShadow = 'none';
+                        e.target.style.transform = 'scale(1)';
+                      }}
                       required
                     />
                   ) : (
-                    <p className="text-gray-900 p-3 bg-gray-50 rounded-2xl font-medium">
+                    <p 
+                      className="p-3 rounded-2xl font-medium transition-all duration-500"
+                      style={{ 
+                        backgroundColor: `${colors.mediumBlue}10`,
+                        color: colors.darkBlue
+                      }}
+                    >
                       {user.name || 'Not provided'}
                     </p>
                   )}
                 </div>
 
-                <div className="space-y-3">
-                  <label className="flex items-center text-sm font-semibold text-gray-700">
-                    <Mail size={18} className="mr-3 text-gray-500" />
+                <div className={`space-y-3 transition-all duration-700 delay-150 ${
+                  isVisible ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'
+                }`}>
+                  <label 
+                    className="flex items-center text-sm font-semibold transition-all duration-500"
+                    style={{ color: colors.darkBlue }}
+                  >
+                    <Mail size={18} className="mr-3" style={{ color: colors.teal }} />
                     Email Address
                   </label>
-                  <p className="text-gray-900 p-3 bg-gray-50 rounded-2xl font-medium">
+                  <p 
+                    className="p-3 rounded-2xl font-medium transition-all duration-500"
+                    style={{ 
+                      backgroundColor: `${colors.mediumBlue}10`,
+                      color: colors.darkBlue
+                    }}
+                  >
                     {user.email || 'Not provided'}
                   </p>
                 </div>
 
-                <div className="space-y-3">
-                  <label className="flex items-center text-sm font-semibold text-gray-700">
-                    <Phone size={18} className="mr-3 text-gray-500" />
+                <div className={`space-y-3 transition-all duration-700 delay-200 ${
+                  isVisible ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'
+                }`}>
+                  <label 
+                    className="flex items-center text-sm font-semibold transition-all duration-500"
+                    style={{ color: colors.darkBlue }}
+                  >
+                    <Phone size={18} className="mr-3" style={{ color: colors.teal }} />
                     Phone Number
                   </label>
                   {isEditing ? (
@@ -293,35 +509,81 @@ const ProfilePage = () => {
                       name="phone"
                       value={formData.phone}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300 bg-white text-gray-900"
+                      className="w-full px-4 py-3 border-2 rounded-2xl focus:outline-none transition-all duration-500 placeholder-opacity-70"
+                      style={{
+                        borderColor: `${colors.mediumBlue}30`,
+                        backgroundColor: colors.cream,
+                        color: colors.darkBlue,
+                        placeholderColor: `${colors.mediumBlue}70`
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = colors.teal;
+                        e.target.style.boxShadow = `0 8px 24px ${colors.teal}20`;
+                        e.target.style.transform = 'scale(1.02)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = `${colors.mediumBlue}30`;
+                        e.target.style.boxShadow = 'none';
+                        e.target.style.transform = 'scale(1)';
+                      }}
                     />
                   ) : (
-                    <p className="text-gray-900 p-3 bg-gray-50 rounded-2xl font-medium">
+                    <p 
+                      className="p-3 rounded-2xl font-medium transition-all duration-500"
+                      style={{ 
+                        backgroundColor: `${colors.mediumBlue}10`,
+                        color: colors.darkBlue
+                      }}
+                    >
                       {user.phone || 'Not provided'}
                     </p>
                   )}
                 </div>
 
-                <div className="space-y-3">
-                  <label className="flex items-center text-sm font-semibold text-gray-700">
-                    <Shield size={18} className="mr-3 text-gray-500" />
+                <div className={`space-y-3 transition-all duration-700 delay-250 ${
+                  isVisible ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'
+                }`}>
+                  <label 
+                    className="flex items-center text-sm font-semibold transition-all duration-500"
+                    style={{ color: colors.darkBlue }}
+                  >
+                    <Shield size={18} className="mr-3" style={{ color: colors.teal }} />
                     Account Type
                   </label>
-                  <div className="flex items-center p-3 bg-gray-50 rounded-2xl">
-                    <span className="text-gray-900 font-medium capitalize">
+                  <div 
+                    className="flex items-center p-3 rounded-2xl transition-all duration-500"
+                    style={{ 
+                      backgroundColor: `${colors.mediumBlue}10`
+                    }}
+                  >
+                    <span 
+                      className="font-medium capitalize transition-all duration-500"
+                      style={{ color: colors.darkBlue }}
+                    >
                       {user.role || 'buyer'}
                     </span>
                     {isAdmin && (
-                      <span className="ml-3 bg-gray-900 text-white text-xs px-3 py-1 rounded-full font-medium">
+                      <span 
+                        className="ml-3 text-xs px-3 py-1 rounded-full font-medium transition-all duration-500 transform hover:scale-105"
+                        style={{ 
+                          backgroundColor: colors.teal,
+                          color: colors.cream
+                        }}
+                      >
                         Verified
                       </span>
                     )}
                   </div>
                 </div>
 
-                <div className="md:col-span-2 space-y-3">
-                  <label className="flex items-center text-sm font-semibold text-gray-700">
-                    <MapPin size={18} className="mr-3 text-gray-500" />
+                <div className={`md:col-span-2 space-y-3 transition-all duration-700 delay-300 ${
+                  isVisible ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'
+                }`}>
+                  <label 
+                    className="flex items-center text-sm font-semibold transition-all duration-500"
+                    style={{ color: colors.darkBlue }}
+                  >
+                    <MapPin size={18} className="mr-3" style={{ color: colors.teal }} />
                     Address
                   </label>
                   {isEditing ? (
@@ -330,20 +592,47 @@ const ProfilePage = () => {
                       value={formData.address}
                       onChange={handleInputChange}
                       rows={3}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300 bg-white text-gray-900 resize-none"
+                      className="w-full px-4 py-3 border-2 rounded-2xl focus:outline-none transition-all duration-500 placeholder-opacity-70 resize-none"
+                      style={{
+                        borderColor: `${colors.mediumBlue}30`,
+                        backgroundColor: colors.cream,
+                        color: colors.darkBlue,
+                        placeholderColor: `${colors.mediumBlue}70`
+                      }}
                       placeholder="Enter your full address..."
+                      onFocus={(e) => {
+                        e.target.style.borderColor = colors.teal;
+                        e.target.style.boxShadow = `0 8px 24px ${colors.teal}20`;
+                        e.target.style.transform = 'scale(1.02)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = `${colors.mediumBlue}30`;
+                        e.target.style.boxShadow = 'none';
+                        e.target.style.transform = 'scale(1)';
+                      }}
                     />
                   ) : (
-                    <p className="text-gray-900 p-3 bg-gray-50 rounded-2xl font-medium min-h-[60px]">
+                    <p 
+                      className="p-3 rounded-2xl font-medium min-h-[60px] transition-all duration-500"
+                      style={{ 
+                        backgroundColor: `${colors.mediumBlue}10`,
+                        color: colors.darkBlue
+                      }}
+                    >
                       {user.address || 'No address provided'}
                     </p>
                   )}
                 </div>
 
                 {isEditing && (
-                  <div className="md:col-span-2 space-y-3">
-                    <label className="flex items-center text-sm font-semibold text-gray-700">
-                      <Camera size={18} className="mr-3 text-gray-500" />
+                  <div className={`md:col-span-2 space-y-3 transition-all duration-700 delay-350 ${
+                    isVisible ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'
+                  }`}>
+                    <label 
+                      className="flex items-center text-sm font-semibold transition-all duration-500"
+                      style={{ color: colors.darkBlue }}
+                    >
+                      <Camera size={18} className="mr-3" style={{ color: colors.teal }} />
                       Avatar URL
                     </label>
                     <input
@@ -351,60 +640,93 @@ const ProfilePage = () => {
                       name="avatar"
                       value={formData.avatar}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300 bg-white text-gray-900"
+                      className="w-full px-4 py-3 border-2 rounded-2xl focus:outline-none transition-all duration-500 placeholder-opacity-70"
+                      style={{
+                        borderColor: `${colors.mediumBlue}30`,
+                        backgroundColor: colors.cream,
+                        color: colors.darkBlue,
+                        placeholderColor: `${colors.mediumBlue}70`
+                      }}
                       placeholder="Enter image URL for your avatar..."
+                      onFocus={(e) => {
+                        e.target.style.borderColor = colors.teal;
+                        e.target.style.boxShadow = `0 8px 24px ${colors.teal}20`;
+                        e.target.style.transform = 'scale(1.02)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = `${colors.mediumBlue}30`;
+                        e.target.style.boxShadow = 'none';
+                        e.target.style.transform = 'scale(1)';
+                      }}
                     />
                   </div>
                 )}
 
-                <div className="md:col-span-2 border-t border-gray-200 pt-8 space-y-4">
-                  <h3 className="font-semibold text-gray-900 text-lg mb-4">Account Information</h3>
+                <div className={`md:col-span-2 border-t pt-8 space-y-4 transition-all duration-700 delay-400 ${
+                  isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+                }`} style={{ borderColor: `${colors.mediumBlue}20` }}>
+                  <h3 
+                    className="font-semibold text-lg mb-4 transition-all duration-500"
+                    style={{ color: colors.darkBlue }}
+                  >
+                    Account Information
+                  </h3>
 
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
-                    <div className="flex items-center">
-                      <Calendar size={18} className="mr-3 text-gray-500" />
-                      <span className="text-gray-700 font-medium">Member since</span>
+                  {[
+                    { icon: Calendar, label: 'Member since', value: formatDate(user.createdAt) },
+                    { icon: Calendar, label: 'Last updated', value: formatDate(user.updatedAt) },
+                    { 
+                      icon: user.isVerified ? CheckCircle : XCircle, 
+                      label: 'Email Verification', 
+                      value: user.isVerified ? 'Verified' : 'Pending',
+                      color: user.isVerified ? 'green' : 'yellow'
+                    }
+                  ].map((item, index) => (
+                    <div 
+                      key={index}
+                      className="flex items-center justify-between p-4 rounded-2xl transition-all duration-500 transform hover:scale-105"
+                      style={{ 
+                        backgroundColor: `${colors.mediumBlue}10`
+                      }}
+                    >
+                      <div className="flex items-center">
+                        <item.icon size={18} className="mr-3" style={{ color: colors.teal }} />
+                        <span 
+                          className="font-medium transition-all duration-500"
+                          style={{ color: colors.darkBlue }}
+                        >
+                          {item.label}
+                        </span>
+                      </div>
+                      <span 
+                        className="font-medium transition-all duration-500"
+                        style={{ color: colors.darkBlue }}
+                      >
+                        {item.value}
+                      </span>
                     </div>
-                    <span className="text-gray-900 font-medium">
-                      {formatDate(user.createdAt)}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
-                    <div className="flex items-center">
-                      <Calendar size={18} className="mr-3 text-gray-500" />
-                      <span className="text-gray-700 font-medium">Last updated</span>
-                    </div>
-                    <span className="text-gray-900 font-medium">
-                      {formatDate(user.updatedAt)}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
-                    <span className="text-gray-700 font-medium">Email Verification</span>
-                    <div className="flex items-center">
-                      {user.isVerified ? (
-                        <>
-                          <CheckCircle size={18} className="text-green-500 mr-2" />
-                          <span className="text-green-800 bg-green-100 px-3 py-1 rounded-full text-sm font-medium">
-                            Verified
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          <XCircle size={18} className="text-yellow-500 mr-2" />
-                          <span className="text-yellow-800 bg-yellow-100 px-3 py-1 rounded-full text-sm font-medium">
-                            Pending
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </div>
+                  ))}
 
                   {user.verificationCode && (
-                    <div className="flex items-center justify-between p-4 bg-blue-50 rounded-2xl">
-                      <span className="text-blue-700 font-medium">Verification Code</span>
-                      <span className="text-blue-800 bg-blue-100 px-3 py-1 rounded-full text-sm font-medium">
+                    <div 
+                      className="flex items-center justify-between p-4 rounded-2xl transition-all duration-500 transform hover:scale-105"
+                      style={{ 
+                        backgroundColor: `${colors.teal}15`
+                      }}
+                    >
+                      <span 
+                        className="font-medium transition-all duration-500"
+                        style={{ color: colors.darkBlue }}
+                      >
+                        Verification Code
+                      </span>
+                      <span 
+                        className="text-sm font-medium px-3 py-1 rounded-full transition-all duration-500 transform hover:scale-105"
+                        style={{ 
+                          backgroundColor: colors.teal,
+                          color: colors.cream
+                        }}
+                      >
                         Active
                       </span>
                     </div>
@@ -412,12 +734,29 @@ const ProfilePage = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-4 mt-8 pt-8 border-t border-gray-200">
+              <div className="flex justify-end space-x-4 mt-8 pt-8 border-t" style={{ borderColor: `${colors.mediumBlue}20` }}>
                 {!isEditing ? (
                   <button
                     type="button"
                     onClick={() => setIsEditing(true)}
-                    className="flex items-center px-8 py-3 bg-gray-900 text-white rounded-2xl hover:bg-gray-800 transition-all duration-300 font-semibold"
+                    className="flex items-center px-8 py-3 rounded-2xl font-semibold transition-all duration-500 transform hover:scale-105 border-2 shadow-lg"
+                    style={{
+                      backgroundColor: colors.teal,
+                      color: colors.cream,
+                      borderColor: colors.teal
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = colors.mediumBlue;
+                      e.target.style.borderColor = colors.mediumBlue;
+                      e.target.style.transform = 'scale(1.05)';
+                      e.target.style.boxShadow = `0 12px 32px ${colors.teal}40`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = colors.teal;
+                      e.target.style.borderColor = colors.teal;
+                      e.target.style.transform = 'scale(1)';
+                      e.target.style.boxShadow = '0 8px 24px rgba(0,0,0,0.2)';
+                    }}
                   >
                     <Edit size={18} className="mr-2" />
                     Edit Profile
@@ -436,7 +775,12 @@ const ProfilePage = () => {
                         });
                         setMessage({ type: '', text: '' });
                       }}
-                      className="px-8 py-3 border border-gray-300 text-gray-700 rounded-2xl hover:bg-gray-50 transition-all duration-300 font-semibold"
+                      className="px-8 py-3 rounded-2xl font-semibold transition-all duration-500 transform hover:scale-105 border-2"
+                      style={{
+                        backgroundColor: `${colors.mediumBlue}15`,
+                        color: colors.darkBlue,
+                        borderColor: `${colors.mediumBlue}30`
+                      }}
                       disabled={isLoading}
                     >
                       Cancel
@@ -444,7 +788,28 @@ const ProfilePage = () => {
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="flex items-center px-8 py-3 bg-gray-900 text-white rounded-2xl hover:bg-gray-800 transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex items-center px-8 py-3 rounded-2xl font-semibold transition-all duration-500 transform hover:scale-105 border-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={{
+                        backgroundColor: isLoading ? `${colors.mediumBlue}50` : colors.teal,
+                        color: colors.cream,
+                        borderColor: isLoading ? `${colors.mediumBlue}50` : colors.teal
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isLoading) {
+                          e.target.style.backgroundColor = colors.mediumBlue;
+                          e.target.style.borderColor = colors.mediumBlue;
+                          e.target.style.transform = 'scale(1.05)';
+                          e.target.style.boxShadow = `0 12px 32px ${colors.teal}40`;
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isLoading) {
+                          e.target.style.backgroundColor = colors.teal;
+                          e.target.style.borderColor = colors.teal;
+                          e.target.style.transform = 'scale(1)';
+                          e.target.style.boxShadow = '0 8px 24px rgba(0,0,0,0.2)';
+                        }
+                      }}
                     >
                       <Save size={18} className="mr-2" />
                       {isLoading ? 'Saving...' : 'Save Changes'}
@@ -456,43 +821,73 @@ const ProfilePage = () => {
           </div>
         </div>
 
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Link
-            to="/orders"
-            className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200/60 hover:border-gray-900 transition-all duration-300 group"
-          >
-            <div className="flex items-center justify-center w-12 h-12 bg-gray-900 rounded-xl mb-4 group-hover:scale-110 transition-transform duration-300">
-              <Package size={24} className="text-white" />
-            </div>
-            <div className="text-gray-900 font-semibold text-lg">View Orders</div>
-            <div className="text-gray-600 text-sm mt-2">Check your order history</div>
-          </Link>
-
-          <Link
-            to="/products"
-            className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200/60 hover:border-gray-900 transition-all duration-300 group"
-          >
-            <div className="flex items-center justify-center w-12 h-12 bg-gray-900 rounded-xl mb-4 group-hover:scale-110 transition-transform duration-300">
-              <ShoppingBag size={24} className="text-white" />
-            </div>
-            <div className="text-gray-900 font-semibold text-lg">Continue Shopping</div>
-            <div className="text-gray-600 text-sm mt-2">Browse our products</div>
-          </Link>
-
-          {isAdmin && (
+        <div className={`mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 transition-all duration-700 delay-500 ${
+          isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+        }`}>
+          {[
+            { to: '/orders', icon: Package, title: 'View Orders', description: 'Check your order history' },
+            { to: '/products', icon: ShoppingBag, title: 'Continue Shopping', description: 'Browse our products' },
+            ...(isAdmin ? [{ to: '/admin', icon: Settings, title: 'Admin Panel', description: 'Manage your store' }] : [])
+          ].map((action, index) => (
             <Link
-              to="/admin"
-              className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200/60 hover:border-gray-900 transition-all duration-300 group"
+              key={index}
+              to={action.to}
+              className="rounded-2xl border backdrop-blur-sm p-6 transition-all duration-500 transform hover:scale-105 group"
+              style={{
+                backgroundColor: `${colors.cream}f8`,
+                borderColor: `${colors.mediumBlue}20`
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = colors.teal;
+                e.currentTarget.style.boxShadow = `0 12px 32px ${colors.teal}20`;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = `${colors.mediumBlue}20`;
+                e.currentTarget.style.boxShadow = 'none';
+              }}
             >
-              <div className="flex items-center justify-center w-12 h-12 bg-gray-900 rounded-xl mb-4 group-hover:scale-110 transition-transform duration-300">
-                <Settings size={24} className="text-white" />
+              <div 
+                className="flex items-center justify-center w-12 h-12 rounded-xl mb-4 transition-all duration-500 transform group-hover:scale-110 group-hover:rotate-6"
+                style={{ 
+                  background: `linear-gradient(135deg, ${colors.teal}, ${colors.mediumBlue})`
+                }}
+              >
+                <action.icon size={24} className="text-white" />
               </div>
-              <div className="text-gray-900 font-semibold text-lg">Admin Panel</div>
-              <div className="text-gray-600 text-sm mt-2">Manage your store</div>
+              <div 
+                className="font-semibold text-lg transition-all duration-500 group-hover:translate-x-1"
+                style={{ color: colors.darkBlue }}
+              >
+                {action.title}
+              </div>
+              <div 
+                className="text-sm mt-2 transition-all duration-500 group-hover:translate-x-1"
+                style={{ color: colors.mediumBlue }}
+              >
+                {action.description}
+              </div>
             </Link>
-          )}
+          ))}
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes float-slow {
+          0%, 100% { 
+            transform: translateY(0px) rotate(0deg); 
+          }
+          33% { 
+            transform: translateY(-10px) rotate(0.5deg); 
+          }
+          66% { 
+            transform: translateY(-5px) rotate(-0.5deg); 
+          }
+        }
+        
+        .animate-float-slow {
+          animation: float-slow 6s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 };

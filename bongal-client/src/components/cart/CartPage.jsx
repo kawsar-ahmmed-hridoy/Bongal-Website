@@ -1,20 +1,14 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Trash2, ArrowRight, Package, ArrowLeft } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
-import { useAuth } from '../../context/AuthContext';
 import CartItem from './CartItem';
 import OrderSummary from './OrderSummary';
 
 const CartPage = () => {
   const { cart, clearCart } = useCart();
-  const { user } = useAuth();
   const navigate = useNavigate();
 
   const handleCheckout = () => {
-    // if (!user) {
-    //   navigate('/login?redirect=/cart');
-    //   return;
-    // }
     navigate('/checkout');
   };
 

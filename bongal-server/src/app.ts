@@ -58,7 +58,6 @@ app.use('/api/posts', postRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/notifications', notificationRoutes);
 
-// Test routes (only in development)
 if (process.env.NODE_ENV === 'development') {
   app.use('/api/test', testRoutes);
 }

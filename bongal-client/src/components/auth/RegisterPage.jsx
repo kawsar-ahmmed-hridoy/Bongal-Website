@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Eye, EyeOff, ArrowRight, User, Mail, Phone, MapPin, Lock, Shield, CheckCircle } from 'lucide-react';
+import { Eye, EyeOff, ArrowRight, User, Mail, Phone, MapPin, Lock, Shield, CheckCircle, Sparkles } from 'lucide-react';
 import { validateEmail, validatePhone, validatePassword } from '../../utils/validation';
 import { authService } from '../../services/authService';
 import toast from 'react-hot-toast';
@@ -15,7 +15,7 @@ const RegisterPage = () => {
     phone: '',
     address: '',
   });
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
@@ -23,9 +23,22 @@ const RegisterPage = () => {
   const [userPassword, setUserPassword] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [verifyingCode, setVerifyingCode] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+
+  const colors = {
+    darkBlue: '#011D4D',
+    mediumBlue: '#034078',
+    teal: '#1282A2',
+    cream: '#E4DFDA',
+    brown: '#63372C'
+  };
 
   const { register, login } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -64,7 +77,6 @@ const RegisterPage = () => {
       setUserPassword(formData.password);
       setVerificationSent(true);
 
-      // Show warning if email wasn't sent
       if (response && !response.emailSent && response.emailError) {
         toast.error(`Email verification failed: ${response.emailError}`);
       } else if (response.emailSent) {
@@ -90,7 +102,6 @@ const RegisterPage = () => {
       await authService.verifyEmail(userEmail, verificationCode);
       toast.success('Email verified successfully!');
 
-      // Auto login after verification
       await login({ email: userEmail, password: userPassword });
       toast.success('Welcome! You are now logged in.');
       navigate('/');
@@ -107,38 +118,83 @@ const RegisterPage = () => {
       toast.success('Welcome! You can verify your email later from your profile.');
       navigate('/');
     } catch (err) {
-      toast.error('Failed to log in. Please try logging in manually.');
+      toast.error('Failed to log in. Please try logging in manually.'+err);
       navigate('/login');
     }
   };
 
-  const togglePasswordVisibility = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setShowPassword(!showPassword);
-  };
-
   if (verificationSent) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-cream-100 to-primary-50 flex items-center justify-center px-4 py-8">
-        <div className="max-w-md w-full space-y-6">
-          <div className="bg-white p-8 rounded-3xl shadow-soft border border-primary-100">
-            <div className="flex justify-center mb-6">
-              <div className="bg-primary-800 p-3 rounded-2xl">
+      <div 
+        className="min-h-screen flex items-center justify-center px-4 py-8 transition-all duration-500"
+        style={{ backgroundColor: colors.cream }}
+      >
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(10)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full animate-float-slow"
+              style={{
+                width: `${10 + i % 3 * 6}px`,
+                height: `${10 + i % 3 * 6}px`,
+                background: `radial-gradient(circle, ${colors.teal}20, ${colors.mediumBlue}15)`,
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${i * 0.4}s`,
+                animationDuration: `${10 + i * 2}s`
+              }}
+            />
+          ))}
+        </div>
+
+        <div className={`max-w-md w-full space-y-6 transition-all duration-700 delay-300 ${
+          isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+        }`}>
+          <div 
+            className="rounded-3xl border p-8 backdrop-blur-sm transition-all duration-500 transform hover:scale-105"
+            style={{
+              backgroundColor: `${colors.cream}f8`,
+              borderColor: `${colors.mediumBlue}20`,
+              boxShadow: '0 20px 60px rgba(0,0,0,0.1)'
+            }}
+          >
+            <div className="flex justify-center mb-6 transition-all duration-500 transform hover:scale-110 hover:rotate-6">
+              <div 
+                className="p-4 rounded-2xl shadow-2xl transition-all duration-500"
+                style={{ 
+                  background: `linear-gradient(135deg, ${colors.teal}, ${colors.mediumBlue})`
+                }}
+              >
                 <Mail className="text-white" size={32} />
               </div>
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-4 text-center tracking-tight">
+            <h2 
+              className="text-3xl font-bold mb-4 text-center tracking-tight transition-all duration-500"
+              style={{ color: colors.darkBlue }}
+            >
               Check Your Email
             </h2>
-            <p className="text-gray-600 text-center mb-6">
+            <p 
+              className="text-center mb-6 transition-all duration-500"
+              style={{ color: colors.mediumBlue }}
+            >
               We've sent a 6-digit verification code to<br />
-              <span className="font-semibold text-primary-800">{userEmail}</span>
+              <span 
+                className="font-semibold transition-all duration-500 transform hover:scale-105 inline-block"
+                style={{ color: colors.teal }}
+              >
+                {userEmail}
+              </span>
             </p>
 
             <form onSubmit={handleVerifyCode} className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <div className={`transition-all duration-700 delay-100 ${
+                isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+              }`}>
+                <label 
+                  className="block text-sm font-semibold mb-2 transition-all duration-500"
+                  style={{ color: colors.darkBlue }}
+                >
                   Verification Code
                 </label>
                 <input
@@ -146,30 +202,85 @@ const RegisterPage = () => {
                   value={verificationCode}
                   onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   placeholder="Enter 6-digit code"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition-all text-center text-2xl tracking-widest"
+                  className="w-full px-4 py-3 border-2 rounded-2xl focus:outline-none transition-all duration-500 text-center text-2xl tracking-widest placeholder-opacity-70"
+                  style={{
+                    borderColor: `${colors.mediumBlue}30`,
+                    backgroundColor: colors.cream,
+                    color: colors.darkBlue,
+                    placeholderColor: `${colors.mediumBlue}70`
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = colors.teal;
+                    e.target.style.boxShadow = `0 8px 24px ${colors.teal}20`;
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = `${colors.mediumBlue}30`;
+                    e.target.style.boxShadow = 'none';
+                  }}
                   maxLength={6}
                 />
               </div>
 
-              <button
-                type="submit"
-                disabled={verifyingCode || verificationCode.length !== 6}
-                className="w-full bg-primary-800 text-white py-3.5 rounded-2xl font-semibold hover:bg-primary-700 transition-all duration-300 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-              >
-                <CheckCircle size={20} />
-                <span>{verifyingCode ? 'Verifying...' : 'Verify Email'}</span>
-              </button>
+              <div className={`space-y-3 transition-all duration-700 delay-200 ${
+                isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+              }`}>
+                <button
+                  type="submit"
+                  disabled={verifyingCode || verificationCode.length !== 6}
+                  className="w-full py-3.5 rounded-2xl font-semibold transition-all duration-500 transform hover:scale-105 flex items-center justify-center space-x-2 border-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{
+                    backgroundColor: verifyingCode ? `${colors.mediumBlue}50` : colors.teal,
+                    color: colors.cream,
+                    borderColor: verifyingCode ? `${colors.mediumBlue}50` : colors.teal
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!verifyingCode && verificationCode.length === 6) {
+                      e.target.style.backgroundColor = colors.mediumBlue;
+                      e.target.style.borderColor = colors.mediumBlue;
+                      e.target.style.transform = 'scale(1.05)';
+                      e.target.style.boxShadow = `0 12px 32px ${colors.teal}40`;
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!verifyingCode && verificationCode.length === 6) {
+                      e.target.style.backgroundColor = colors.teal;
+                      e.target.style.borderColor = colors.teal;
+                      e.target.style.transform = 'scale(1)';
+                      e.target.style.boxShadow = '0 8px 24px rgba(0,0,0,0.2)';
+                    }
+                  }}
+                >
+                  <CheckCircle size={20} />
+                  <span>{verifyingCode ? 'Verifying...' : 'Verify Email'}</span>
+                </button>
 
-              <button
-                type="button"
-                onClick={handleSkipVerification}
-                className="w-full bg-cream-100 text-primary-800 py-3 rounded-2xl font-semibold hover:bg-cream-200 transition-all duration-300"
-              >
-                Skip for Now
-              </button>
+                <button
+                  type="button"
+                  onClick={handleSkipVerification}
+                  className="w-full py-3 rounded-2xl font-semibold transition-all duration-500 transform hover:scale-105 border-2"
+                  style={{
+                    backgroundColor: `${colors.mediumBlue}15`,
+                    color: colors.darkBlue,
+                    borderColor: `${colors.mediumBlue}30`
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = `${colors.mediumBlue}25`;
+                    e.target.style.borderColor = colors.teal;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = `${colors.mediumBlue}15`;
+                    e.target.style.borderColor = `${colors.mediumBlue}30`;
+                  }}
+                >
+                  Skip for Now
+                </button>
+              </div>
             </form>
 
-            <p className="text-sm text-gray-500 text-center mt-6">
+            <p 
+              className="text-sm text-center mt-6 transition-all duration-500"
+              style={{ color: colors.mediumBlue }}
+            >
               Code expires in 15 minutes
             </p>
           </div>
@@ -179,205 +290,524 @@ const RegisterPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex items-center justify-center px-4 py-8">
-      <div className="max-w-md w-full space-y-8">
+    <div 
+      className="min-h-screen flex items-center justify-center px-4 py-8 transition-all duration-500"
+      style={{ backgroundColor: colors.cream }}
+    >
+      <div className="absolute inset-0 overflow-hidden">
+        {[...Array(12)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full animate-float-slow"
+            style={{
+              width: `${6 + i % 4 * 4}px`,
+              height: `${6 + i % 4 * 4}px`,
+              background: `radial-gradient(circle, ${colors.teal}15, ${colors.mediumBlue}10)`,
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${i * 0.3}s`,
+              animationDuration: `${8 + i * 1.5}s`
+            }}
+          />
+        ))}
+        
+        <div 
+          className="absolute top-10 right-10 w-48 h-48 rounded-full blur-3xl opacity-10 animate-pulse-slow"
+          style={{ backgroundColor: colors.teal }}
+        />
+        <div 
+          className="absolute bottom-10 left-10 w-48 h-48 rounded-full blur-3xl opacity-10 animate-pulse-slower"
+          style={{ backgroundColor: colors.mediumBlue }}
+        />
+      </div>
+
+      <div className={`max-w-md w-full space-y-8 transition-all duration-700 delay-300 ${
+        isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+      }`}>
         <div className="text-center">
-          <div className="flex justify-center mb-6">
-            <div className="bg-gray-900 p-3 rounded-2xl">
+          <div 
+            className="flex justify-center mb-6 transition-all duration-500 transform hover:scale-110 hover:rotate-6"
+          >
+            <div 
+              className="p-4 rounded-2xl shadow-2xl transition-all duration-500"
+              style={{ 
+                background: `linear-gradient(135deg, ${colors.teal}, ${colors.mediumBlue})`
+              }}
+            >
               <User className="text-white" size={32} />
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-3 tracking-tight">
+          <h1 
+            className="text-4xl font-bold mb-3 tracking-tight transition-all duration-500"
+            style={{ color: colors.darkBlue }}
+          >
             Create Account
           </h1>
-          <p className="text-gray-600 text-lg font-light bengali-text">
+          <p 
+            className="text-lg font-light bengali-text transition-all duration-500"
+            style={{ color: colors.mediumBlue }}
+          >
             নতুন অ্যাকাউন্ট তৈরি করুন
           </p>
         </div>
 
-        <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-400/60">
-          {errors.submit && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-600 text-sm font-medium">
-              {errors.submit}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <label className="block text-sm font-semibold text-gray-700">
-                Full Name *
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User size={20} className="text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 ${errors.name ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  placeholder="Enter your full name"
-                />
+        <div 
+          className="rounded-3xl border backdrop-blur-sm transition-all duration-500 transform hover:scale-105"
+          style={{
+            backgroundColor: `${colors.cream}f8`,
+            borderColor: `${colors.mediumBlue}20`,
+            boxShadow: '0 20px 60px rgba(0,0,0,0.1)'
+          }}
+        >
+          <div className="p-8 space-y-6">
+            {errors.submit && (
+              <div 
+                className="p-4 border rounded-2xl text-sm font-medium transition-all duration-500 transform hover:scale-105"
+                style={{
+                  backgroundColor: `${colors.brown}15`,
+                  borderColor: `${colors.brown}30`,
+                  color: colors.brown
+                }}
+              >
+                {errors.submit}
               </div>
-              {errors.name && <p className="text-red-500 text-xs mt-1 font-medium">{errors.name}</p>}
-            </div>
+            )}
 
-            <div className="space-y-2">
-              <label className="block text-sm font-semibold text-gray-700">
-                Email Address *
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail size={20} className="text-gray-400" />
-                </div>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 ${errors.email ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  placeholder="your@email.com"
-                />
-              </div>
-              {errors.email && <p className="text-red-500 text-xs mt-1 font-medium">{errors.email}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-semibold text-gray-700">
-                Phone Number *
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Phone size={20} className="text-gray-400" />
-                </div>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 ${errors.phone ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  placeholder="01XXXXXXXXX"
-                />
-              </div>
-              {errors.phone && <p className="text-red-500 text-xs mt-1 font-medium">{errors.phone}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-semibold text-gray-700">
-                Password *
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock size={20} className="text-gray-400" />
-                </div>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 ${errors.password ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  placeholder="••••••••"
-                />
-                <button
-                  type="button"
-                  onClick={togglePasswordVisibility}
-                  onMouseDown={(e) => e.preventDefault()}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-all duration-300 rounded-lg"
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className={`space-y-2 transition-all duration-700 delay-100 ${
+                isVisible ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'
+              }`}>
+                <label 
+                  className="block text-sm font-semibold transition-all duration-500"
+                  style={{ color: colors.darkBlue }}
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  Full Name *
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-500 group-hover:scale-110">
+                    <User 
+                      size={20} 
+                      style={{ color: colors.teal }}
+                    />
+                  </div>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-2xl focus:outline-none transition-all duration-500 placeholder-opacity-70 group-hover:scale-105 ${
+                      errors.name ? 'border-red-500' : ''
+                    }`}
+                    style={{
+                      borderColor: errors.name ? colors.brown : `${colors.mediumBlue}30`,
+                      backgroundColor: colors.cream,
+                      color: colors.darkBlue,
+                      placeholderColor: `${colors.mediumBlue}70`
+                    }}
+                    placeholder="Enter your full name"
+                    onFocus={(e) => {
+                      e.target.style.borderColor = colors.teal;
+                      e.target.style.boxShadow = `0 8px 24px ${colors.teal}20`;
+                      e.target.style.transform = 'scale(1.02)';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = errors.name ? colors.brown : `${colors.mediumBlue}30`;
+                      e.target.style.boxShadow = 'none';
+                      e.target.style.transform = 'scale(1)';
+                    }}
+                  />
+                </div>
+                {errors.name && (
+                  <p className="text-red-500 text-xs mt-1 font-medium transition-all duration-500">
+                    {errors.name}
+                  </p>
+                )}
+              </div>
+
+              <div className={`space-y-2 transition-all duration-700 delay-150 ${
+                isVisible ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'
+              }`}>
+                <label 
+                  className="block text-sm font-semibold transition-all duration-500"
+                  style={{ color: colors.darkBlue }}
+                >
+                  Email Address *
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-500 group-hover:scale-110">
+                    <Mail 
+                      size={20} 
+                      style={{ color: colors.teal }}
+                    />
+                  </div>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-2xl focus:outline-none transition-all duration-500 placeholder-opacity-70 group-hover:scale-105 ${
+                      errors.email ? 'border-red-500' : ''
+                    }`}
+                    style={{
+                      borderColor: errors.email ? colors.brown : `${colors.mediumBlue}30`,
+                      backgroundColor: colors.cream,
+                      color: colors.darkBlue,
+                      placeholderColor: `${colors.mediumBlue}70`
+                    }}
+                    placeholder="your@email.com"
+                    onFocus={(e) => {
+                      e.target.style.borderColor = colors.teal;
+                      e.target.style.boxShadow = `0 8px 24px ${colors.teal}20`;
+                      e.target.style.transform = 'scale(1.02)';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = errors.email ? colors.brown : `${colors.mediumBlue}30`;
+                      e.target.style.boxShadow = 'none';
+                      e.target.style.transform = 'scale(1)';
+                    }}
+                  />
+                </div>
+                {errors.email && (
+                  <p className="text-red-500 text-xs mt-1 font-medium transition-all duration-500">
+                    {errors.email}
+                  </p>
+                )}
+              </div>
+
+              <div className={`space-y-2 transition-all duration-700 delay-200 ${
+                isVisible ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'
+              }`}>
+                <label 
+                  className="block text-sm font-semibold transition-all duration-500"
+                  style={{ color: colors.darkBlue }}
+                >
+                  Phone Number *
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-500 group-hover:scale-110">
+                    <Phone 
+                      size={20} 
+                      style={{ color: colors.teal }}
+                    />
+                  </div>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-2xl focus:outline-none transition-all duration-500 placeholder-opacity-70 group-hover:scale-105 ${
+                      errors.phone ? 'border-red-500' : ''
+                    }`}
+                    style={{
+                      borderColor: errors.phone ? colors.brown : `${colors.mediumBlue}30`,
+                      backgroundColor: colors.cream,
+                      color: colors.darkBlue,
+                      placeholderColor: `${colors.mediumBlue}70`
+                    }}
+                    placeholder="01XXXXXXXXX"
+                    onFocus={(e) => {
+                      e.target.style.borderColor = colors.teal;
+                      e.target.style.boxShadow = `0 8px 24px ${colors.teal}20`;
+                      e.target.style.transform = 'scale(1.02)';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = errors.phone ? colors.brown : `${colors.mediumBlue}30`;
+                      e.target.style.boxShadow = 'none';
+                      e.target.style.transform = 'scale(1)';
+                    }}
+                  />
+                </div>
+                {errors.phone && (
+                  <p className="text-red-500 text-xs mt-1 font-medium transition-all duration-500">
+                    {errors.phone}
+                  </p>
+                )}
+              </div>
+
+              <div className={`space-y-2 transition-all duration-700 delay-250 ${
+                isVisible ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'
+              }`}>
+                <label 
+                  className="block text-sm font-semibold transition-all duration-500"
+                  style={{ color: colors.darkBlue }}
+                >
+                  Password *
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-500 group-hover:scale-110">
+                    <Lock 
+                      size={20} 
+                      style={{ color: colors.teal }}
+                    />
+                  </div>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className={`w-full pl-10 pr-12 py-3 border-2 rounded-2xl focus:outline-none transition-all duration-500 placeholder-opacity-70 group-hover:scale-105 ${
+                      errors.password ? 'border-red-500' : ''
+                    }`}
+                    style={{
+                      borderColor: errors.password ? colors.brown : `${colors.mediumBlue}30`,
+                      backgroundColor: colors.cream,
+                      color: colors.darkBlue,
+                      placeholderColor: `${colors.mediumBlue}70`
+                    }}
+                    placeholder="••••••••"
+                    onFocus={(e) => {
+                      e.target.style.borderColor = colors.teal;
+                      e.target.style.boxShadow = `0 8px 24px ${colors.teal}20`;
+                      e.target.style.transform = 'scale(1.02)';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = errors.password ? colors.brown : `${colors.mediumBlue}30`;
+                      e.target.style.boxShadow = 'none';
+                      e.target.style.transform = 'scale(1)';
+                    }}
+                  />
+            
+                </div>
+                {errors.password && (
+                  <p className="text-red-500 text-xs mt-1 font-medium transition-all duration-500">
+                    {errors.password}
+                  </p>
+                )}
+              </div>
+
+              <div className={`space-y-2 transition-all duration-700 delay-300 ${
+                isVisible ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'
+              }`}>
+                <label 
+                  className="block text-sm font-semibold transition-all duration-500"
+                  style={{ color: colors.darkBlue }}
+                >
+                  Confirm Password *
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-500 group-hover:scale-110">
+                    <Lock 
+                      size={20} 
+                      style={{ color: colors.teal }}
+                    />
+                  </div>
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-2xl focus:outline-none transition-all duration-500 placeholder-opacity-70 group-hover:scale-105 ${
+                      errors.confirmPassword ? 'border-red-500' : ''
+                    }`}
+                    style={{
+                      borderColor: errors.confirmPassword ? colors.brown : `${colors.mediumBlue}30`,
+                      backgroundColor: colors.cream,
+                      color: colors.darkBlue,
+                      placeholderColor: `${colors.mediumBlue}70`
+                    }}
+                    placeholder="••••••••"
+                    onFocus={(e) => {
+                      e.target.style.borderColor = colors.teal;
+                      e.target.style.boxShadow = `0 8px 24px ${colors.teal}20`;
+                      e.target.style.transform = 'scale(1.02)';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = errors.confirmPassword ? colors.brown : `${colors.mediumBlue}30`;
+                      e.target.style.boxShadow = 'none';
+                      e.target.style.transform = 'scale(1)';
+                    }}
+                  />
+                </div>
+                {errors.confirmPassword && (
+                  <p className="text-red-500 text-xs mt-1 font-medium transition-all duration-500">
+                    {errors.confirmPassword}
+                  </p>
+                )}
+              </div>
+
+              <div className={`space-y-2 transition-all duration-700 delay-350 ${
+                isVisible ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'
+              }`}>
+                <label 
+                  className="block text-sm font-semibold transition-all duration-500"
+                  style={{ color: colors.darkBlue }}
+                >
+                  Address
+                </label>
+                <div className="relative group">
+                  <div className="absolute top-3 left-3 pointer-events-none transition-all duration-500 group-hover:scale-110">
+                    <MapPin 
+                      size={20} 
+                      style={{ color: colors.teal }}
+                    />
+                  </div>
+                  <textarea
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    className="w-full pl-10 pr-4 py-3 border-2 rounded-2xl focus:outline-none transition-all duration-500 placeholder-opacity-70 resize-none group-hover:scale-105"
+                    style={{
+                      borderColor: `${colors.mediumBlue}30`,
+                      backgroundColor: colors.cream,
+                      color: colors.darkBlue,
+                      placeholderColor: `${colors.mediumBlue}70`
+                    }}
+                    placeholder="Your delivery address"
+                    rows="3"
+                    onFocus={(e) => {
+                      e.target.style.borderColor = colors.teal;
+                      e.target.style.boxShadow = `0 8px 24px ${colors.teal}20`;
+                      e.target.style.transform = 'scale(1.02)';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = `${colors.mediumBlue}30`;
+                      e.target.style.boxShadow = 'none';
+                      e.target.style.transform = 'scale(1)';
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className={`transition-all duration-700 delay-400 ${
+                isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+              }`}>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-4 rounded-2xl font-semibold transition-all duration-500 transform hover:scale-105 flex items-center justify-center space-x-2 border-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed group"
+                  style={{
+                    backgroundColor: loading ? `${colors.mediumBlue}50` : colors.teal,
+                    color: colors.cream,
+                    borderColor: loading ? `${colors.mediumBlue}50` : colors.teal
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!loading) {
+                      e.target.style.backgroundColor = colors.mediumBlue;
+                      e.target.style.borderColor = colors.mediumBlue;
+                      e.target.style.transform = 'scale(1.05) translateY(-2px)';
+                      e.target.style.boxShadow = `0 16px 40px ${colors.teal}40`;
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!loading) {
+                      e.target.style.backgroundColor = colors.teal;
+                      e.target.style.borderColor = colors.teal;
+                      e.target.style.transform = 'scale(1)';
+                      e.target.style.boxShadow = '0 8px 24px rgba(0,0,0,0.2)';
+                    }
+                  }}
+                >
+                  <span>{loading ? 'Creating Account...' : 'Create Account'}</span>
+                  <ArrowRight 
+                    size={20} 
+                    className="group-hover:translate-x-2 transition-transform duration-300" 
+                  />
                 </button>
               </div>
-              {errors.password && <p className="text-red-500 text-xs mt-1 font-medium">{errors.password}</p>}
-            </div>
+            </form>
 
-            <div className="space-y-2">
-              <label className="block text-sm font-semibold text-gray-700">
-                Confirm Password *
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock size={20} className="text-gray-400" />
-                </div>
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  placeholder="••••••••"
-                />
+            <div className={`relative my-8 transition-all duration-700 delay-500 ${
+              isVisible ? 'opacity-100' : 'opacity-0'
+            }`}>
+              <div 
+                className="absolute inset-0 flex items-center"
+                style={{ color: `${colors.mediumBlue}30` }}
+              >
+                <div className="w-full border-t"></div>
               </div>
-              {errors.confirmPassword && <p className="text-red-500 text-xs mt-1 font-medium">{errors.confirmPassword}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-semibold text-gray-700">
-                Address
-              </label>
-              <div className="relative">
-                <div className="absolute top-3 left-3 pointer-events-none">
-                  <MapPin size={20} className="text-gray-400" />
-                </div>
-                <textarea
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300 bg-white text-gray-900 placeholder-gray-500 resize-none"
-                  placeholder="Your delivery address"
-                  rows="3"
-                />
+              <div className="relative flex justify-center text-sm">
+                <span 
+                  className="px-3 transition-all duration-500"
+                  style={{ 
+                    backgroundColor: `${colors.cream}f8`,
+                    color: colors.mediumBlue
+                  }}
+                >
+                  Already have an account?
+                </span>
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gray-900 text-white py-4 rounded-2xl font-semibold hover:bg-gray-800 transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center space-x-2 group"
-            >
-              <span>{loading ? 'Creating Account...' : 'Create Account'}</span>
-              <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-300" />
-            </button>
-          </form>
-
-          <div className="relative my-8">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
+            <div className={`text-center transition-all duration-700 delay-600 ${
+              isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+            }`}>
+              <Link
+                to="/login"
+                className="inline-flex items-center space-x-2 font-semibold transition-all duration-500 transform hover:scale-105 group"
+                style={{ color: colors.darkBlue }}
+              >
+                <span>Sign in to your account</span>
+                <ArrowRight 
+                  size={16} 
+                  className="group-hover:translate-x-2 transition-transform duration-300" 
+                />
+              </Link>
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Already have an account?</span>
-            </div>
-          </div>
-
-          <div className="text-center">
-            <Link
-              to="/login"
-              className="inline-flex items-center space-x-2 text-gray-900 font-semibold hover:text-gray-700 transition-colors duration-300 group"
-            >
-              <span>Sign in to your account</span>
-              <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-300" />
-            </Link>
           </div>
         </div>
 
-        <div className="text-center">
-          <p className="text-gray-500 text-sm">
+        <div className={`text-center transition-all duration-700 delay-700 ${
+          isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+        }`}>
+          <p 
+            className="text-sm transition-all duration-500"
+            style={{ color: colors.mediumBlue }}
+          >
             By creating an account, you agree to our{' '}
-            <Link to="/terms" className="text-gray-700 hover:text-gray-900 font-medium underline">
+            <Link 
+              to="/terms" 
+              className="font-medium underline transition-all duration-500 transform hover:scale-105 inline-block"
+              style={{ color: colors.teal }}
+            >
               Terms of Service
             </Link>{' '}
             and{' '}
-            <Link to="/privacy" className="text-gray-700 hover:text-gray-900 font-medium underline">
+            <Link 
+              to="/privacy" 
+              className="font-medium underline transition-all duration-500 transform hover:scale-105 inline-block"
+              style={{ color: colors.teal }}
+            >
               Privacy Policy
             </Link>
           </p>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes float-slow {
+          0%, 100% { 
+            transform: translateY(0px) rotate(0deg); 
+          }
+          33% { 
+            transform: translateY(-12px) rotate(0.8deg); 
+          }
+          66% { 
+            transform: translateY(-6px) rotate(-0.8deg); 
+          }
+        }
+        
+        @keyframes pulse-slow {
+          0%, 100% { opacity: 0.1; }
+          50% { opacity: 0.15; }
+        }
+        
+        @keyframes pulse-slower {
+          0%, 100% { opacity: 0.08; }
+          50% { opacity: 0.12; }
+        }
+        
+        .animate-float-slow {
+          animation: float-slow 7s ease-in-out infinite;
+        }
+        
+        .animate-pulse-slow {
+          animation: pulse-slow 6s ease-in-out infinite;
+        }
+        
+        .animate-pulse-slower {
+          animation: pulse-slower 8s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 };

@@ -5,10 +5,19 @@ import { messageService } from '../../services/messageService';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
+const COLORS = {
+  primaryDark: '#011D4D',
+  primary: '#034078',
+  accent: '#1282A2',
+  light: '#E4DFDA',
+  brown: '#63372C'
+};
+
 const CustomerSupportChat = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const [formData, setFormData] = useState({
     message: ''
   });
@@ -19,6 +28,14 @@ const CustomerSupportChat = () => {
   const messagesContainerRef = useRef(null);
   const pollingIntervalRef = useRef(null);
   const lastMessageCountRef = useRef(0);
+
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => setIsVisible(true), 50);
+    } else {
+      setIsVisible(false);
+    }
+  }, [isOpen]);
 
   const scrollToBottom = (behavior = 'auto') => {
     setTimeout(() => {
@@ -74,6 +91,7 @@ const CustomerSupportChat = () => {
         lastMessageCountRef.current = messageHistory.length;
       }
     } catch (error) {
+      console.log(error);
     }
   };
 
@@ -94,7 +112,8 @@ const CustomerSupportChat = () => {
     setLoading(true);
 
     try {
-      const response = await messageService.sendMessage(formData);
+      await messageService.sendMessage(formData);
+      
 
       const newMessage = {
         text: formData.message,
@@ -128,15 +147,28 @@ const CustomerSupportChat = () => {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 bg-primary-800 text-white p-4 rounded-full shadow-2xl hover:bg-primary-700 transition-all duration-300 transform hover:scale-110 group"
+          className="fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-2xl transition-all duration-500 transform hover:scale-110 group animate-bounce-subtle"
+          style={{ 
+            backgroundColor: COLORS.primary,
+            background: `linear-gradient(135deg, ${COLORS.primary} 0%, ${COLORS.accent} 100%)`
+          }}
           aria-label="Open customer support chat"
         >
-          <MessageCircle size={28} />
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+          <MessageCircle size={28} className="text-white animate-pulse-slow" />
+          <span 
+            className="absolute -top-1 -right-1 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold animate-ping"
+            style={{ backgroundColor: COLORS.brown }}
+          >
             !
           </span>
 
-          <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+          <div 
+            className="absolute bottom-full right-0 mb-2 px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-2 group-hover:translate-y-0 whitespace-nowrap shadow-lg"
+            style={{ 
+              backgroundColor: COLORS.primaryDark,
+              color: COLORS.light
+            }}
+          >
             Need help? Chat with us!
           </div>
         </button>
@@ -144,39 +176,71 @@ const CustomerSupportChat = () => {
 
       {isOpen && (
         <div
-          className="fixed bottom-6 right-6 z-50 bg-white rounded-3xl shadow-2xl transition-all duration-300 w-96 h-[600px] flex flex-col overflow-hidden border-2 border-primary-100"
+          className={`fixed bottom-6 right-6 z-50 rounded-3xl shadow-2xl transition-all duration-500 w-96 h-[600px] flex flex-col overflow-hidden border-2 ${
+            isVisible 
+              ? 'opacity-100 transform translate-y-0 scale-100' 
+              : 'opacity-0 transform translate-y-10 scale-95'
+          }`}
+          style={{ 
+            backgroundColor: COLORS.light,
+            borderColor: COLORS.primary
+          }}
         >
-          <div className="bg-gradient-to-r from-primary-800 to-primary-600 text-white p-4 flex items-center justify-between">
+          <div 
+            className="text-white p-4 flex items-center justify-between shadow-lg"
+            style={{
+              background: `linear-gradient(135deg, ${COLORS.primaryDark} 0%, ${COLORS.primary} 50%, ${COLORS.accent} 100%)`
+            }}
+          >
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                <MessageCircle className="text-primary-800" size={20} />
+              <div 
+                className="w-10 h-10 rounded-full flex items-center justify-center animate-pulse-slow"
+                style={{ backgroundColor: COLORS.light }}
+              >
+                <MessageCircle 
+                  className="animate-bounce-subtle" 
+                  style={{ color: COLORS.primaryDark }}
+                  size={20} 
+                />
               </div>
               <div>
                 <h3 className="font-semibold">Customer Support</h3>
-                <p className="text-xs text-primary-100">We typically reply within minutes</p>
+                <p className="text-xs opacity-90">We typically reply within minutes</p>
               </div>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="p-1.5 hover:bg-primary-700 rounded-lg transition-colors"
+              className="p-1.5 hover:bg-opacity-20 hover:bg-white rounded-lg transition-all duration-300 transform hover:rotate-90"
             >
               <X size={18} />
             </button>
           </div>
+
           <div
             ref={messagesContainerRef}
-            className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50"
+            className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-white to-gray-50"
           >
             {messages.length === 0 && (
-              <div className="flex items-start space-x-2">
-                <div className="w-8 h-8 bg-primary-800 rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="flex items-start space-x-2 animate-fade-in">
+                <div 
+                  className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg"
+                  style={{ backgroundColor: COLORS.primary }}
+                >
                   <MessageCircle className="text-white" size={16} />
                 </div>
-                <div className="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm max-w-[80%]">
+                <div 
+                  className="p-3 rounded-2xl rounded-tl-none shadow-lg max-w-[80%] transform transition-all duration-300 hover:scale-105"
+                  style={{ 
+                    backgroundColor: 'white',
+                    borderLeft: `4px solid ${COLORS.accent}`
+                  }}
+                >
                   <p className="text-sm text-gray-800">
                     Hi there! 👋 How can we help you today?
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">Bongal Support</p>
+                  <p className="text-xs mt-1" style={{ color: COLORS.accent }}>
+                    Bongal Support
+                  </p>
                 </div>
               </div>
             )}
@@ -185,10 +249,20 @@ const CustomerSupportChat = () => {
               messages.map((msg, index) => {
                 const showDate = index === 0 || msg.date !== messages[index - 1]?.date;
                 return (
-                  <div key={`${msg.sender}-${index}`}>
+                  <div 
+                    key={`${msg.sender}-${index}`}
+                    className="animate-fade-in-up"
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
                     {showDate && msg.date && (
                       <div className="flex items-center justify-center my-4">
-                        <div className="bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full">
+                        <div 
+                          className="text-xs px-3 py-1 rounded-full shadow-sm"
+                          style={{ 
+                            backgroundColor: COLORS.light,
+                            color: COLORS.primaryDark
+                          }}
+                        >
                           {msg.date}
                         </div>
                       </div>
@@ -196,45 +270,61 @@ const CustomerSupportChat = () => {
 
                     <div className={`flex items-start space-x-2 ${msg.sender === 'user' ? 'justify-end' : ''}`}>
                       {msg.sender === 'admin' && (
-                        <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <div 
+                          className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg animate-bounce-subtle"
+                          style={{ backgroundColor: COLORS.accent }}
+                        >
                           <MessageCircle className="text-white" size={16} />
                         </div>
                       )}
                       <div
-                        className={`p-3 rounded-2xl shadow-sm max-w-[80%] ${msg.sender === 'user'
-                          ? 'bg-primary-800 text-white rounded-tr-none'
-                          : msg.sender === 'admin'
-                            ? 'bg-green-50 text-gray-800 rounded-tl-none border border-green-200'
-                            : 'bg-white text-gray-800 rounded-tl-none'
-                          }`}
+                        className={`p-3 rounded-2xl shadow-lg max-w-[80%] transform transition-all duration-300 hover:scale-105 ${
+                          msg.sender === 'user'
+                            ? 'rounded-tr-none'
+                            : 'rounded-tl-none'
+                        }`}
+                        style={{
+                          backgroundColor: msg.sender === 'user' 
+                            ? COLORS.primary 
+                            : 'white',
+                          color: msg.sender === 'user' ? 'white' : COLORS.primaryDark,
+                          borderLeft: msg.sender === 'admin' ? `4px solid ${COLORS.accent}` : 'none',
+                          borderRight: msg.sender === 'user' ? `4px solid ${COLORS.primaryDark}` : 'none'
+                        }}
                       >
                         {msg.sender === 'admin' && (
-                          <p className="text-xs font-semibold mb-1 text-green-700">
+                          <p 
+                            className="text-xs font-semibold mb-1"
+                            style={{ color: COLORS.accent }}
+                          >
                             বঙ্গাল
                           </p>
                         )}
                         <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
                         <div className="flex items-center justify-between mt-1">
-                          <p className={`text-xs ${msg.sender === 'user'
-                            ? 'text-primary-200'
-                            : msg.sender === 'admin'
-                              ? 'text-green-600'
-                              : 'text-gray-500'
-                            }`}>
+                          <p 
+                            className={`text-xs ${
+                              msg.sender === 'user' ? 'opacity-80' : 'opacity-60'
+                            }`}
+                          >
                             {msg.time}
                           </p>
                           {msg.status && msg.sender === 'user' && (
-                            <span className={`text-xs ${msg.status === 'read'
-                              ? 'text-blue-400'
-                              : 'text-gray-400'
-                              }`}>
-                              {msg.status === 'read' ? '✓✓' : '○'}
+                            <span 
+                              className={`text-xs ${
+                                msg.status === 'read' ? 'opacity-100' : 'opacity-50'
+                              }`}
+                            >
+                              {msg.status === 'read' ? '✓' : '○'}
                             </span>
                           )}
                         </div>
                       </div>
                       {msg.sender === 'user' && (
-                        <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <div 
+                          className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg"
+                          style={{ backgroundColor: COLORS.primaryDark }}
+                        >
                           <User className="text-white" size={16} />
                         </div>
                       )}
@@ -247,10 +337,16 @@ const CustomerSupportChat = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          <div className="p-4 bg-white border-t border-gray-200">
+          <div 
+            className="p-4 border-t shadow-inner"
+            style={{ 
+              backgroundColor: 'white',
+              borderColor: COLORS.light
+            }}
+          >
             {!user ? (
               <div className="text-center py-4">
-                <p className="text-sm text-gray-600 mb-3">
+                <p className="text-sm mb-3" style={{ color: COLORS.primaryDark }}>
                   Sign in to chat with our support team
                 </p>
                 <button
@@ -258,7 +354,11 @@ const CustomerSupportChat = () => {
                     setIsOpen(false);
                     navigate('/login');
                   }}
-                  className="w-full bg-primary-800 text-white py-2 rounded-2xl font-medium hover:bg-primary-700 transition-all"
+                  className="w-full py-2 rounded-2xl font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
+                  style={{
+                    background: `linear-gradient(135deg, ${COLORS.primary} 0%, ${COLORS.accent} 100%)`,
+                    color: 'white'
+                  }}
                 >
                   Sign In
                 </button>
@@ -272,7 +372,18 @@ const CustomerSupportChat = () => {
                     onChange={handleChange}
                     placeholder="Type your message..."
                     rows={2}
-                    className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-600 focus:border-transparent resize-none"
+                    className="flex-1 px-3 py-2 text-sm border rounded-xl resize-none transition-all duration-300 focus:shadow-lg focus:scale-105"
+                    style={{ 
+                      borderColor: COLORS.light,
+                      backgroundColor: 'white',
+                      color: COLORS.primaryDark
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = COLORS.accent;
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = COLORS.light;
+                    }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
@@ -283,17 +394,27 @@ const CustomerSupportChat = () => {
                   <button
                     type="submit"
                     disabled={loading || !formData.message.trim()}
-                    className="bg-primary-800 text-white p-3 rounded-xl hover:bg-primary-700 transition-all disabled:bg-gray-300 disabled:cursor-not-allowed"
+                    className="p-3 rounded-xl transition-all duration-300 transform hover:scale-110 disabled:scale-100 disabled:opacity-50 shadow-lg"
+                    style={{
+                      backgroundColor: loading || !formData.message.trim() ? COLORS.light : COLORS.primary,
+                      color: 'white'
+                    }}
                   >
                     {loading ? (
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <div 
+                        className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin"
+                        style={{ borderColor: 'white' }}
+                      />
                     ) : (
                       <Send size={18} />
                     )}
                   </button>
                 </div>
 
-                <p className="text-xs text-gray-500 text-center">
+                <p 
+                  className="text-xs text-center opacity-60"
+                  style={{ color: COLORS.primaryDark }}
+                >
                   Press Enter to send, Shift+Enter for new line
                 </p>
               </form>
@@ -301,6 +422,47 @@ const CustomerSupportChat = () => {
           </div>
         </div>
       )}
+
+      <style jsx>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        @keyframes bounceSubtle {
+          0%, 100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-5px);
+          }
+        }
+        @keyframes pulseSlow {
+          0%, 100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.8;
+          }
+        }
+        .animate-fade-in-up {
+          animation: fadeInUp 0.5s ease-out forwards;
+        }
+        .animate-bounce-subtle {
+          animation: bounceSubtle 2s ease-in-out infinite;
+        }
+        .animate-pulse-slow {
+          animation: pulseSlow 3s ease-in-out infinite;
+        }
+        .animate-fade-in {
+          animation: fadeInUp 0.6s ease-out;
+        }
+      `}</style>
     </>
   );
 };

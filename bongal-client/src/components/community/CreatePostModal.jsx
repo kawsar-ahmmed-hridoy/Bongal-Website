@@ -1,8 +1,16 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { X, Image, AlertCircle } from 'lucide-react';
+import { X, Image, AlertCircle, Send, Sparkles } from 'lucide-react';
 import { postService } from '../../services/postService';
 import toast from 'react-hot-toast';
+
+const COLORS = {
+  darkBlue: '#011D4D',
+  mediumBlue: '#034078',
+  teal: '#1282A2',
+  cream: '#E4DFDA',
+  brown: '#63372C'
+};
 
 const CreatePostModal = ({ onClose, onSuccess, categories }) => {
   const [formData, setFormData] = useState({
@@ -22,7 +30,6 @@ const CreatePostModal = ({ onClose, onSuccess, categories }) => {
         position: 'top-center',
       });
 
-      // Wait a bit before closing modal so user sees the success message
       setTimeout(() => {
         onSuccess();
       }, 1500);
@@ -52,13 +59,12 @@ const CreatePostModal = ({ onClose, onSuccess, categories }) => {
       return;
     }
 
-    // Validate file types and sizes
     const validFiles = files.filter(file => {
       if (!file.type.startsWith('image/')) {
         toast.error(`${file.name} is not an image file`);
         return false;
       }
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      if (file.size > 10 * 1024 * 1024) {
         toast.error(`${file.name} is too large (max 10MB)`);
         return false;
       }
@@ -68,7 +74,6 @@ const CreatePostModal = ({ onClose, onSuccess, categories }) => {
     if (validFiles.length > 0) {
       setImageFiles(prev => [...prev, ...validFiles]);
 
-      // Create preview URLs
       const newPreviewUrls = validFiles.map(file => URL.createObjectURL(file));
       setImagePreview(prev => [...prev, ...newPreviewUrls]);
     }
@@ -78,7 +83,6 @@ const CreatePostModal = ({ onClose, onSuccess, categories }) => {
     setImageFiles(prev => prev.filter((_, i) => i !== index));
     setImagePreview(prev => {
       const newPreview = prev.filter((_, i) => i !== index);
-      // Revoke the URL to free memory
       URL.revokeObjectURL(prev[index]);
       return newPreview;
     });
@@ -149,6 +153,7 @@ const CreatePostModal = ({ onClose, onSuccess, categories }) => {
 
       createPostMutation.mutate(postData);
     } catch (error) {
+      console.log(error);
     }
   };
 
@@ -156,27 +161,31 @@ const CreatePostModal = ({ onClose, onSuccess, categories }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-bold text-gray-900">Share Your Story</h2>
+      <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-100 hover:scale-[1.02]">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <div className="flex items-center space-x-2">
+            <Sparkles size={18} className="text-yellow-500" />
+            <h2 className="text-lg font-bold text-gray-900">Share Your Story</h2>
+          </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+            className="p-1.5 rounded-lg hover:bg-gray-100 transition-all duration-300 transform hover:scale-110"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs font-semibold text-gray-700 mb-1">
               Category
             </label>
             <select
               name="category"
               value={formData.category}
               onChange={handleInputChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition-all"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300 text-sm"
+              style={{ backgroundColor: 'white' }}
             >
               {categories.map(category => (
                 <option key={category.value} value={category.value}>
@@ -192,18 +201,18 @@ const CreatePostModal = ({ onClose, onSuccess, categories }) => {
               value={formData.content}
               onChange={handleInputChange}
               placeholder="Share your thoughts, experiences, or stories..."
-              rows={6}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition-all resize-none"
+              rows={4}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-300 resize-none text-sm"
               maxLength={5000}
               required
             />
-            <div className="text-right text-sm text-gray-500 mt-1">
+            <div className="text-right text-xs text-gray-500 mt-1">
               {formData.content.length}/5000
             </div>
           </div>
 
           {imageFiles.length < 2 && (
-            <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:border-primary-400 transition-colors">
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center hover:border-gray-400 transition-all duration-300 transform hover:scale-[1.02]">
               <input
                 type="file"
                 multiple
@@ -215,64 +224,71 @@ const CreatePostModal = ({ onClose, onSuccess, categories }) => {
               />
               <label
                 htmlFor="image-upload"
-                className="cursor-pointer flex items-center justify-center space-x-2 text-gray-600 hover:text-primary-600 transition-colors"
+                className="cursor-pointer flex items-center justify-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors duration-300"
               >
-                <Image size={20} />
-                <span>Add photos (max 2)</span>
+                <Image size={16} />
+                <span className="text-sm">Add photos (max 2)</span>
               </label>
             </div>
           )}
 
           {imagePreview.length > 0 && (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               {imagePreview.map((url, index) => (
-                <div key={index} className="relative">
+                <div key={index} className="relative group">
                   <img
                     src={url}
                     alt={`Preview ${index + 1}`}
-                    className="w-full h-48 object-cover rounded-xl"
+                    className="w-full h-32 object-cover rounded-lg transition-all duration-300 group-hover:brightness-90"
                   />
                   <button
                     type="button"
                     onClick={() => removeImage(index)}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                    className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-all duration-300 transform hover:scale-110 opacity-0 group-hover:opacity-100"
                   >
-                    <X size={16} />
+                    <X size={12} />
                   </button>
                 </div>
               ))}
             </div>
           )}
 
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 transition-all duration-300 hover:shadow-sm">
             <div className="flex items-center space-x-2">
-              <AlertCircle className="text-amber-600" size={16} />
-              <p className="text-sm text-amber-800">
+              <AlertCircle className="text-amber-600" size={14} />
+              <p className="text-xs text-amber-800">
                 Your post will be reviewed before publishing. Keep it respectful and genuine!
               </p>
             </div>
           </div>
 
-          <div className="flex space-x-3 pt-4 border-t border-gray-200">
+          <div className="flex space-x-2 pt-3 border-t border-gray-200">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-all duration-300"
+              className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-all duration-300 transform hover:scale-105 text-sm"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading || !formData.content.trim()}
-              className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-all duration-300 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              className="flex-1 px-3 py-2 text-white rounded-lg font-medium transition-all duration-300 transform hover:scale-105 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:transform-none text-sm flex items-center justify-center space-x-2 group"
+              style={{ 
+                backgroundColor: isLoading ? COLORS.teal : COLORS.mediumBlue,
+                backgroundImage: !isLoading ? `linear-gradient(135deg, ${COLORS.mediumBlue} 0%, ${COLORS.teal} 100%)` : 'none'
+              }}
             >
               {isLoading ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>{uploadingImages ? 'Uploading...' : 'Posting...'}</span>
+                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span className="text-xs">{uploadingImages ? 'Uploading...' : 'Posting...'}</span>
                 </>
               ) : (
-                <span>Post</span>
+                <>
+                  <Send size={14} className="group-hover:translate-x-0.5 transition-transform duration-300" />
+                  <span>Post</span>
+                </>
               )}
             </button>
           </div>

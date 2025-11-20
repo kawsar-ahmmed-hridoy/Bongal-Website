@@ -1,11 +1,9 @@
 import { useCart } from '../../context/CartContext';
-import { useAuth } from '../../context/AuthContext';
 import { formatPrice } from '../../utils/helpers';
 import { Shield, Truck, Lock, ArrowRight, Package } from 'lucide-react';
 
 const OrderSummary = ({ onCheckout }) => {
   const { cartTotal, cartCount } = useCart();
-  const { user } = useAuth();
 
   const deliveryFee = cartTotal >= 500 ? 0 : 60;
   const tax = Math.round(cartTotal * 0.05);

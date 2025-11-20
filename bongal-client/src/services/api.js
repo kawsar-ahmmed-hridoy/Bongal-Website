@@ -27,15 +27,12 @@ api.interceptors.response.use(
       const requestUrl = error.config?.url || '';
       const requestMethod = error.config?.method || '';
 
-      // Don't redirect for login/register endpoints
       const isAuthEndpoint = requestUrl.includes('/auth/login') ||
         requestUrl.includes('/auth/register') ||
         requestUrl.includes('/auth/verify-code');
 
-      // Don't redirect to login for guest checkout (order creation)
       const isGuestCheckout = requestUrl.includes('/orders') && requestMethod === 'post';
 
-      // Don't redirect for public endpoints (products, etc.)
       const isPublicEndpoint = requestUrl.includes('/products') ||
         requestUrl.includes('/categories');
 

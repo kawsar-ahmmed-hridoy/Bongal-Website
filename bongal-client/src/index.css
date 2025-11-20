@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom base styles */
+
 body {
   background-color: #F7F7F2;
   color: #333333;
@@ -13,7 +13,6 @@ body {
   min-height: 100vh;
 }
 
-/* Bengali text styling */
 .bengali-text {
   font-family: 'Baloo Da 2', cursive, sans-serif;
   font-weight: 500;

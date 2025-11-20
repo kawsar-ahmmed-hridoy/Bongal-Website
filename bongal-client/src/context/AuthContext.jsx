@@ -28,6 +28,7 @@ export const AuthProvider = ({ children }) => {
         setUser(userData);
       }
     } catch (error) {
+      console.log(error);
       localStorage.removeItem('token');
     } finally {
       setLoading(false);
@@ -35,6 +36,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (credentials) => {
+    // eslint-disable-next-line no-useless-catch
     try {
       const data = await authService.login(credentials);
       setUser(data.user);
@@ -45,6 +47,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (userData) => {
+    // eslint-disable-next-line no-useless-catch
     try {
       const data = await authService.register(userData);
       return data;

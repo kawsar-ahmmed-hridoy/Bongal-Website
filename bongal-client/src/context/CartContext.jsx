@@ -17,6 +17,7 @@ export const CartProvider = ({ children }) => {
       const savedCart = localStorage.getItem('cart');
       return savedCart ? JSON.parse(savedCart) : [];
     } catch (error) {
+      console.log(error);
       return [];
     }
   });
@@ -24,7 +25,8 @@ export const CartProvider = ({ children }) => {
   useEffect(() => {
     try {
       localStorage.setItem('cart', JSON.stringify(cart));
-    } catch (error) {
+    } catch (error) { 
+      console.log(error); 
     }
   }, [cart]);
 

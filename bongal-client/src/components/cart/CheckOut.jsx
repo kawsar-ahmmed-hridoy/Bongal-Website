@@ -6,17 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { orderService } from '../../services/orderService';
 import { formatPrice } from '../../utils/helpers';
 import { validatePhone, validateRequired } from '../../utils/validation';
-import {
-  CreditCard,
-  Truck,
-  MapPin,
-  Phone,
-  User,
-  Mail,
-  ShoppingBag,
-  CheckCircle,
-  Loader2
-} from 'lucide-react';
+import { CreditCard, Truck, MapPin, Phone, User, Mail, ShoppingBag, CheckCircle, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const CheckOut = () => {
@@ -57,7 +47,6 @@ const CheckOut = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
@@ -150,10 +139,8 @@ const CheckOut = () => {
 
       <form onSubmit={handleSubmit}>
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Left Column - Forms */}
           <div className="lg:col-span-2 space-y-6">
 
-            {/* Contact Information */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <div className="flex items-center gap-2 mb-4">
                 <User className="text-green-600" size={24} />
@@ -219,7 +206,6 @@ const CheckOut = () => {
               </div>
             </div>
 
-            {/* Shipping Address */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <div className="flex items-center gap-2 mb-4">
                 <Truck className="text-green-600" size={24} />
@@ -284,7 +270,6 @@ const CheckOut = () => {
               </div>
             </div>
 
-            {/* Payment Method */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <div className="flex items-center gap-2 mb-4">
                 <CreditCard className="text-green-600" size={24} />
@@ -337,7 +322,6 @@ const CheckOut = () => {
               </div>
             </div>
 
-            {/* Additional Notes */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-xl font-bold mb-4">Additional Notes (Optional)</h2>
               <textarea
@@ -351,12 +335,10 @@ const CheckOut = () => {
             </div>
           </div>
 
-          {/* Right Column - Order Summary */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-md p-6 sticky top-24">
               <h2 className="text-xl font-bold mb-4">Order Summary</h2>
 
-              {/* Cart Items */}
               <div className="space-y-3 mb-4 max-h-64 overflow-y-auto">
                 {cart.map((item) => (
                   <div key={item.id} className="flex gap-3 pb-3 border-b border-gray-200">
@@ -378,7 +360,6 @@ const CheckOut = () => {
                 ))}
               </div>
 
-              {/* Price Breakdown */}
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal ({cartCount} items)</span>
@@ -398,7 +379,6 @@ const CheckOut = () => {
                 </div>
               </div>
 
-              {/* Place Order Button */}
               <button
                 type="submit"
                 disabled={createOrderMutation.isPending}

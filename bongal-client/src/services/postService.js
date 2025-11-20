@@ -2,6 +2,7 @@ import api from './api';
 
 export const postService = {
   createPost: async (postData) => {
+    // eslint-disable-next-line no-useless-catch
     try {
       const response = await api.post('/posts', postData);
       return response.data;
