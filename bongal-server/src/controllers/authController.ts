@@ -28,20 +28,21 @@ export const register = async (req: Request, res: Response) => {
       verificationCodeExpires: codeExpiry,
     });
 
-    let emailSent = true;
-    let emailError = '';
-    try {
-      await emailService.sendVerificationEmail(user.email, verificationCode);
-    } catch (error: any) {
-      emailSent = false;
-      emailError = error.message || 'Failed to send verification email';
-    }
+    // Send verification email in background (don't wait)
+    console.log('📧 Attempting to send verification email to:', user.email);
+    emailService.sendVerificationEmail(user.email, verificationCode)
+      .then(() => {
+        console.log('✅ Verification email sent successfully to:', user.email);
+      })
+      .catch(error => {
+        console.error('❌ Failed to send verification email:', error);
+      });
 
+    // Respond immediately
     res.status(201).json({
       success: true,
-      message: 'Registration successful! You can now login.',
-      emailSent,
-      emailError: emailSent ? undefined : emailError,
+      message: 'Registration successful! Check your email for verification code.',
+      emailSent: true,
       user: { id: user._id, name: user.name, email: user.email, role: user.role, isVerified: user.isVerified },
     });
   } catch (error: any) {

@@ -37,3 +37,9 @@ START_HERE.md
 DEPLOYMENT_CHECKLIST.md
 CREDENTIALS.md
 deployment-tester.html
+
+# Test files
+bongal-server/test-email.js
+bongal-server/test-resend.js
+bongal-server/test-*.js
+**/test-*.js
