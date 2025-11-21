@@ -127,6 +127,8 @@ bongal/
 │   │   │   │   ├── ProductCard.jsx
 │   │   │   │   ├── AuthComponents.jsx
 │   │   │   │   ├── Layout.jsx
+│   │   │   │   ├── CustomerSupport.jsx
+│   │   │   │   ├── NotificationBell.jsx
 │   │   │   │   ├── Loader.jsx
 │   │   │   │   ├── NotFound.jsx
 │   │   │   │   ├── ProtectedRoutes.jsx
@@ -145,7 +147,17 @@ bongal/
 │   │   │   ├── cart/
 │   │   │   │   ├── CartPage.jsx
 │   │   │   │   ├── CartItem.jsx
+│   │   │   │   ├── CheckOut.jsx
 │   │   │   │   └── OrderSummary.jsx
+|   |   |   |
+│   │   │   ├── community/
+│   │   │   │   ├── CommentSection.jsx
+│   │   │   │   ├── CommunityPage.jsx
+│   │   │   │   ├── CreatePostModal.jsx
+│   │   │   │   ├── CreatePostWidget.jsx
+│   │   │   │   ├── PostCard.jsx
+│   │   │   │   ├── PostDetailPage.jsx
+│   │   │   │   └── PostFilters.jsx
 │   │   │   │
 │   │   │   ├── orders/
 │   │   │   │   ├── OrdersPage.jsx
@@ -162,13 +174,26 @@ bongal/
 │   │   │       ├── AdminDashboard.jsx
 │   │   │       ├── ProductManagement.jsx
 │   │   │       ├── OrderManagement.jsx
+│   │   │       ├── ImageUpload.jsx
+│   │   │       ├── MessageManagement.jsx
+│   │   │       ├── PostManagement.jsx
 │   │   │       └── Analytics.jsx
+│   │   │
+│   │   │
+│   │   ├── config/
+│   │   │   ├── index.js
 │   │   │
 │   │   ├── services/
 │   │   │   ├── api.js
 │   │   │   ├── authService.js
 │   │   │   ├── productService.js
 │   │   │   ├── orderService.js
+│   │   │   ├── commentService.js
+│   │   │   ├── messageService.js
+│   │   │   ├── notificationService.js
+│   │   │   ├── postService.js
+│   │   │   ├── reviewService.js
+│   │   │   ├── uploadService.js
 │   │   │   └── paymentService.js
 │   │   │
 │   │   ├── hooks/
@@ -190,6 +215,7 @@ bongal/
 │   │   │
 │   │   ├── App.jsx
 │   │   ├── App.css
+│   │   ├── index.css
 │   │   └── main.jsx
 │   │
 │   ├── .env
@@ -203,14 +229,19 @@ bongal/
 │   ├── src/
 │   │   ├── config/
 │   │   │   ├── database.ts
-│   │   │   ├── cloudinary.ts
-│   │   │   └── payment.ts
+│   │   │   └── cloudinary.ts
 │   │   │
 │   │   ├── models/
 │   │   │   ├── User.ts
 │   │   │   ├── Product.ts
 │   │   │   ├── Order.ts
 │   │   │   ├── Review.ts
+│   │   │   ├── Category.ts
+│   │   │   ├── Comment.ts
+│   │   │   ├── Message.ts
+│   │   │   ├── Notification.ts
+│   │   │   ├── Post.ts
+│   │   │   ├── PostCategory.ts
 │   │   │   └── Category.ts
 │   │   │
 │   │   ├── controllers/
@@ -218,6 +249,13 @@ bongal/
 │   │   │   ├── productController.ts
 │   │   │   ├── orderController.ts
 │   │   │   ├── userController.ts
+│   │   │   ├── commentController.ts
+│   │   │   ├── messageController.ts
+│   │   │   ├── notificationController.ts
+│   │   │   ├── postController.ts
+│   │   │   ├── reviewController.ts
+│   │   │   ├── testController.ts
+│   │   │   ├── uploadController.ts
 │   │   │   └── paymentController.ts
 │   │   │
 │   │   ├── routes/
@@ -225,6 +263,13 @@ bongal/
 │   │   │   ├── productRoutes.ts
 │   │   │   ├── orderRoutes.ts
 │   │   │   ├── userRoutes.ts
+│   │   │   ├── commentRoutes.ts
+│   │   │   ├── messageRoutes.ts
+│   │   │   ├── notificationRoutes.ts
+│   │   │   ├── postRoutes.ts
+│   │   │   ├── reviewRoutes.ts
+│   │   │   ├── testRoutes.ts
+│   │   │   ├── uploadRoutes.ts
 │   │   │   └── paymentRoutes.ts
 │   │   │
 │   │   ├── middleware/
